@@ -1,14 +1,23 @@
-import { NextResponse } from 'next/server';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
-// This middleware just passes the request through
-export function middleware(req: NextRequest) {
-  return NextResponse.next();
-}
+// Define public (unauthenticated) routes
+const isPublicRoute = createRouteMatcher([
+  '/api(.*)',          // ✅ Allow all API routes
+  '/sign-in(.*)',      // ✅ Allow sign-in
+  '/sign-up(.*)',      // ✅ Allow sign-up
+]);
 
-// Match all routes (optional, to be explicit)
+// ✅ Correct usage: auth is passed in by clerkMiddleware
+export default clerkMiddleware(async (auth, req: NextRequest) => {
+  if (!isPublicRoute(req)) {
+    await auth.protect(); // 🔐 Protect non-API routes
+  }
+});
+
+// ✅ Match all routes except static assets
 export const config = {
   matcher: [
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/((?!_next|.*\\.(?:ico|png|jpg|jpeg|svg|js|css|woff2?|ttf|map)).*)',
   ],
 };
