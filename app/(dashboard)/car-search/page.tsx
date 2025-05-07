@@ -36,18 +36,9 @@ export default function CarSearchPage() {
       {loading && <p className="mt-4 text-center">טוען...</p>}
 
       {result && (
-       <div className="mt-6 grid gap-4 bg-gray-50 p-5 rounded-lg shadow-sm">
-       {Object.entries(result).map(([key, value]) => (
-         <div
-           key={key}
-           className="grid grid-cols-2 gap-2 bg-white p-3 rounded border hover:shadow transition"
-         >
-           <span className="font-semibold text-gray-700">{key}</span>
-           <span className="text-gray-600 break-all">{String(value)}</span>
-         </div>
-       ))}
-     </div>
-     
+        <pre className="mt-6 bg-gray-100 p-4 rounded overflow-auto text-sm">
+          {JSON.stringify(result, null, 2)}
+        </pre>
       )}
     </div>
   );
