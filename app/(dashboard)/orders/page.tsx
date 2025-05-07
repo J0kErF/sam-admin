@@ -1,5 +1,6 @@
 "use client"
 
+import { CustomTable } from "@/components/custom ui/CustomTable"
 import { DataTable } from "@/components/custom ui/DataTable"
 import Loader from "@/components/custom ui/Loader"
 import { columns } from "@/components/orders/OrderColumns"
@@ -30,7 +31,7 @@ const Orders = () => {
     <div className="px-10 py-5">
       <p className="text-heading2-bold">קניות</p>
       <Separator className="bg-grey-1 my-5"/>
-      <DataTable columns={columns} data={orders} searchKey="_id" />
+      <CustomTable columns={columns} data={orders} />
     </div>
   )
 }
