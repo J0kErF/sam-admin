@@ -52,7 +52,7 @@ export default function CarSearchPage() {
                             <h2 className="text-lg font-semibold text-blue-700 mb-2">
                                 {car.kinuy_mishari || "רכב"}
                             </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                            <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 text-sm text-gray-800">
                                 {[
                                     ["מספר רכב", car.mispar_rechev],
                                     ["יצרן", car.tozeret_nm],
