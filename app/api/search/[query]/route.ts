@@ -10,6 +10,9 @@ export const GET = async (req: NextRequest, { params }: { params: { query: strin
       $or: [
         { title: { $regex: params.query, $options: "i" } },
         { category: { $regex: params.query, $options: "i" } },
+        { description: { $regex: params.query, $options: "i" } },// $in is used to match an array of values
+        { location: { $in: [new RegExp(params.query, "i")] } }, // $in is used to match an array of values
+        { collections: { $in: [new RegExp(params.query, "i")] } }, // $in is used to match an array of values
         { tags: { $in: [new RegExp(params.query, "i")] } } // $in is used to match an array of values
       ]
     })
