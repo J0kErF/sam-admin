@@ -37,30 +37,32 @@ export default function CarSearchPage() {
         </button>
       </div>
 
-      {loading && <p className="mt-4 text-center text-sm text-gray-500">טוען...</p>}
+      {loading && <p className="mt-4 text-center">טוען...</p>}
 
       {result?.result?.records?.length > 0 && (
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-6 grid gap-6">
           {result.result.records.map((car: any) => (
             <div
               key={car._id}
-              className="border rounded-lg shadow-md p-4 bg-white"
+              className="border rounded-lg shadow-md p-5 bg-white text-sm"
             >
-              <h2 className="text-lg font-semibold text-blue-700 mb-2">
-                {car.kinuy_mishari} ({car.degem_nm})
+              <h2 className="text-lg font-semibold text-blue-700 mb-3">
+                {car.kinuy_mishari || "דגם לא ידוע"} ({car.degem_nm})
               </h2>
-              <p><strong>מספר רכב:</strong> {car.mispar_rechev}</p>
-              <p><strong>שנת יצור:</strong> {car.shnat_yitzur}</p>
-              <p><strong>צבע:</strong> {car.tzeva_rechev}</p>
-              <p><strong>בעלות:</strong> {car.baalut}</p>
-              <p><strong>יצרן:</strong> {car.tozeret_nm}</p>
-              <p><strong>רמת גימור:</strong> {car.ramat_gimur}</p>
-              <p><strong>דגם מנוע:</strong> {car.degem_manoa}</p>
-              <p><strong>סוג דלק:</strong> {car.sug_delek_nm}</p>
-              <p><strong>צמיג קדמי:</strong> {car.zmig_kidmi}</p>
-              <p><strong>צמיג אחורי:</strong> {car.zmig_ahori}</p>
-              <p><strong>טסט אחרון:</strong> {car.mivchan_acharon_dt}</p>
-              <p><strong>תוקף טסט:</strong> {car.tokef_dt}</p>
+              <div className="grid grid-cols-2 gap-4 max-sm:grid-cols-1">
+                <div><strong>מספר רכב:</strong> {car.mispar_rechev}</div>
+                <div><strong>שנת יצור:</strong> {car.shnat_yitzur}</div>
+                <div><strong>צבע:</strong> {car.tzeva_rechev}</div>
+                <div><strong>בעלות:</strong> {car.baalut}</div>
+                <div><strong>יצרן:</strong> {car.tozeret_nm}</div>
+                <div><strong>רמת גימור:</strong> {car.ramat_gimur}</div>
+                <div><strong>דגם מנוע:</strong> {car.degem_manoa}</div>
+                <div><strong>סוג דלק:</strong> {car.sug_delek_nm}</div>
+                <div><strong>צמיג קדמי:</strong> {car.zmig_kidmi}</div>
+                <div><strong>צמיג אחורי:</strong> {car.zmig_ahori}</div>
+                <div><strong>טסט אחרון:</strong> {car.mivchan_acharon_dt}</div>
+                <div><strong>תוקף טסט:</strong> {car.tokef_dt}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -72,4 +74,3 @@ export default function CarSearchPage() {
     </div>
   );
 }
-export const dynamic = "force-dynamic";
