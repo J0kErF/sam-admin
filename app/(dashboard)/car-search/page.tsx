@@ -38,7 +38,7 @@ export default function CarSearchPage() {
             {result && (
                 <pre className="mt-6 bg-gray-100 p-4 rounded overflow-auto text-sm">
                     {JSON.stringify(result, null, 2)}
-                    {result && result.result && result.result.records && (
+                    
                         <div className="mt-6 grid gap-4">
                             {result.result.records.map((car: any, index: number) => (
                                 <div key={index} className="border rounded-lg p-4 shadow-sm bg-white">
@@ -77,7 +77,7 @@ export default function CarSearchPage() {
                                 </div>
                             ))}
                         </div>
-                    )}
+                    
 
                 </pre>
 
