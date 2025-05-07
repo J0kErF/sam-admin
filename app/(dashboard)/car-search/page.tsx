@@ -4,29 +4,17 @@ import { useState } from "react";
 
 export default function CarSearchPage() {
   const [carNumber, setCarNumber] = useState("");
-  const [result, setResult] = useState<any[]>([]);
+  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleSearch = async () => {
     if (!carNumber.trim()) return;
+
     setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/car-search?q=${carNumber}`);
-      const data = await res.json();
-      if (!data.result || !data.result.records || data.result.records.length === 0) {
-        setError("לא נמצאו תוצאות.");
-        setResult([]);
-      } else {
-        setResult(data.result.records);
-      }
-    } catch (err) {
-      setError("אירעה שגיאה בעת אחזור הנתונים.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    const res = await fetch(`/api/car-search?q=${carNumber}`);
+    const data = await res.json();
+    setResult(data);
+    setLoading(false);
   };
 
   return (
@@ -49,12 +37,11 @@ export default function CarSearchPage() {
         </button>
       </div>
 
-      {loading && <p className="mt-4 text-center text-sm text-gray-500">טוען נתונים...</p>}
-      {error && <p className="mt-4 text-center text-red-500">{error}</p>}
+      {loading && <p className="mt-4 text-center text-sm text-gray-500">טוען...</p>}
 
-      {result.length > 0 && (
+      {result?.result?.records?.length > 0 && (
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {result.map((car) => (
+          {result.result.records.map((car: any) => (
             <div
               key={car._id}
               className="border rounded-lg shadow-md p-4 bg-white"
@@ -78,6 +65,11 @@ export default function CarSearchPage() {
           ))}
         </div>
       )}
+
+      {result?.result?.records?.length === 0 && !loading && (
+        <p className="mt-6 text-center text-gray-500">לא נמצאו תוצאות.</p>
+      )}
     </div>
   );
 }
+export const dynamic = "force-dynamic";
