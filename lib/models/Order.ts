@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
-      color: String,
+      location: String,
       size: String,
       quantity: Number,
     },

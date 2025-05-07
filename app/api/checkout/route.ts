@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
             metadata: {
               productId: cartItem.item._id,
               ...(cartItem.size && { size: cartItem.size }),
-              ...(cartItem.color && { color: cartItem.color }),
+              ...(cartItem.location && { location: cartItem.location }),
             },
           },
           unit_amount: cartItem.item.price * 100,

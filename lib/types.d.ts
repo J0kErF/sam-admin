@@ -32,7 +32,7 @@ type OrderColumnType = {
 
 type OrderItemType = {
   product: ProductType
-  color: string;
+  location: string;
   size: string;
   quantity: number;
 }

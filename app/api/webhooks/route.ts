@@ -42,7 +42,7 @@ export const POST = async (req: NextRequest) => {
       const orderItems = lineItems?.map((item: any) => {
         return {
           product: item.price.product.metadata.productId,
-          color: item.price.product.metadata.color || "N/A",
+          location: item.price.product.metadata.location || "N/A",
           size: item.price.product.metadata.size || "N/A",
           quantity: item.quantity,
         }
