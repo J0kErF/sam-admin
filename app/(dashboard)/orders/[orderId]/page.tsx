@@ -11,7 +11,7 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
 
   return (
     <div className="flex flex-col p-10 gap-5">
-      <div className="flex items-center justify-between" dir="rtl">
+      <div dir="rtl">
       <p className="text-base-bold">
         ID: <span className="text-base-medium">{orderDetails._id}</span>
       </p>
