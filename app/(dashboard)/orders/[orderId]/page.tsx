@@ -11,8 +11,9 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
 
   return (
     <div className="flex flex-col p-10 gap-5">
+      <div className="flex items-center justify-between" dir="rtl">
       <p className="text-base-bold">
-        מספר מזהה: <span className="text-base-medium">{orderDetails._id}</span>
+        ID: <span className="text-base-medium">{orderDetails._id}</span>
       </p>
       <p className="text-base-bold">
         שם משתמש: <span className="text-base-medium">{customer.name}</span>
@@ -27,6 +28,7 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
       <p className="text-base-bold">
         סכום מחיר המוצרים: <span className="text-base-medium">${orderDetails.totalAmount}</span>
       </p>
+      </div>
       <DataTable columns={columns} data={orderDetails.products} searchKey="product" />
     </div>
   )
