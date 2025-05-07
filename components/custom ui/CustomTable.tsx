@@ -21,14 +21,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// 🔍 Custom global filter function with Unicode normalization
-function globalFilterFn<TData>(row: any, columnId: string, filterValue: string) {
-  const rowValue = String(row.getValue(columnId))
-    .toLowerCase()
-    .normalize("NFKC");
-  const filter = filterValue.toLowerCase().normalize("NFKC");
+function normalize(text: string): string {
+  return text
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
+    .replace(/[\u200F\u200E\u061C]/g, "") // remove RTL marks
+    .replace(/\s+/g, " ") // normalize whitespace
+    .trim()
+    .toLowerCase();
+}
 
-  return rowValue.includes(filter);
+function globalFilterFn<TData>(row: any, _columnId: string, filterValue: string) {
+  const normalizedFilter = normalize(filterValue);
+  return row.getAllCells().some((cell: any) => {
+    const value = normalize(String(cell.getValue() ?? ""));
+    return value.includes(normalizedFilter);
+  });
 }
 
 interface CustomTableProps<TData, TValue> {
@@ -48,7 +56,7 @@ export function CustomTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    globalFilterFn: globalFilterFn,
+    globalFilterFn,
     state: {
       globalFilter,
     },
@@ -57,7 +65,6 @@ export function CustomTable<TData, TValue>({
 
   return (
     <div className="py-5">
-      {/* 🔍 Search input */}
       <div className="flex items-center py-4">
         <Input
           placeholder="חיפוש בכל העמודות..."
@@ -67,7 +74,6 @@ export function CustomTable<TData, TValue>({
         />
       </div>
 
-      {/* 🧾 Table rendering */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -118,7 +124,6 @@ export function CustomTable<TData, TValue>({
         </Table>
       </div>
 
-      {/* 🔁 Pagination controls */}
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
           variant="outline"
