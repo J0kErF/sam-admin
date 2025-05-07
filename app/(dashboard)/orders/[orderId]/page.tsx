@@ -31,7 +31,7 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
       </p>
       </div>
       
-      <DataTable columns={columns} data={orderDetails.products} searchKey="product.title" />
+      <CustomTable columns={columns} data={orderDetails.products} />
     </div>
   )
 }

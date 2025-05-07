@@ -24,8 +24,8 @@ import {
 function normalize(text: string): string {
   return text
     .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
-    .replace(/[\u200F\u200E\u061C]/g, "") // remove RTL marks
+    .replace(/\[\u0300-\u036f]/g, "") // remove diacritics
+    .replace(/\[\u200F\u200E\u061C]/g, "") // remove RTL marks
     .replace(/\s+/g, " ") // normalize whitespace
     .trim()
     .toLowerCase();
@@ -33,10 +33,13 @@ function normalize(text: string): string {
 
 function globalFilterFn<TData>(row: any, _columnId: string, filterValue: string) {
   const normalizedFilter = normalize(filterValue);
-  return row.getAllCells().some((cell: any) => {
-    const value = normalize(String(cell.getValue() ?? ""));
-    return value.includes(normalizedFilter);
-  });
+
+  const rowData = row.original;
+  const combinedValues = Object.values(rowData)
+    .map((v) => normalize(String(v ?? "")))
+    .join(" ");
+
+  return combinedValues.includes(normalizedFilter);
 }
 
 interface CustomTableProps<TData, TValue> {
