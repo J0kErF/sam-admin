@@ -1,5 +1,6 @@
 import { DataTable } from "@/components/custom ui/DataTable"
 import { columns } from "@/components/orderItems/OrderItemsColums"
+import {CustomTable} from "@/components/custom ui/CustomTable"
 
 const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
   const res = await fetch(`${process.env.ADMIN_DASHBOARD_URL}/api/orders/${params.orderId}`,
@@ -29,7 +30,7 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
         סכום מחיר המוצרים: <span className="text-base-medium">${orderDetails.totalAmount}</span>
       </p>
       </div>
-      <DataTable columns={columns} data={orderDetails.products} searchKey="product" />
+      <CustomTable columns={columns} data={orderDetails.products} />
     </div>
   )
 }
