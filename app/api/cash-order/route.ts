@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongoDB";
 import Order from "@/lib/models/Order";
 import Customer from "@/lib/models/Customer";
+import Product from "@/lib/models/Product";
+import mongoose from "mongoose";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*", // or use http://localhost:3001 to be more strict
@@ -33,9 +36,9 @@ export async function POST(req: NextRequest) {
       customerClerkId: clerkId,
       products: orderItems,
       shippingAddress: shippingDetails,
-      shippingRate: "cash-on-delivery",
+      shippingRate: "טיפול",
       totalAmount,
-      paymentMethod: "cash",
+      paymentMethod: "",
       paymentStatus: "pending",
     });
 
@@ -55,6 +58,27 @@ export async function POST(req: NextRequest) {
     }
 
     await customer.save();
+
+    for (const item of orderItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        const currentQty = parseFloat(product.quantity.toString());
+
+        if (currentQty >= item.quantity) {
+          product.quantity = mongoose.Types.Decimal128.fromString(
+            (currentQty - item.quantity).toString()
+          );
+          await product.save();
+        } else {
+          return new NextResponse(
+            `Insufficient stock for ${product.title}`,
+            { status: 400, headers: corsHeaders }
+          );
+        }
+      }
+    }
+
+
 
     return new NextResponse("Cash order created", {
       status: 200,
