@@ -30,7 +30,8 @@ const OrderDetails = async ({ params }: { params: { orderId: string } }) => {
         סכום מחיר המוצרים: <span className="text-base-medium">${orderDetails.totalAmount}</span>
       </p>
       </div>
-      <CustomTable columns={columns} data={orderDetails.products} />
+      
+      <DataTable columns={columns} data={orderDetails.products} searchKey="product.title" />
     </div>
   )
 }
