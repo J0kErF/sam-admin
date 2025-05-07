@@ -52,23 +52,29 @@ export default function CarSearchPage() {
                             <h2 className="text-lg font-semibold text-blue-700 mb-2">
                                 {car.kinuy_mishari || "רכב"}
                             </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-800">
-                                <div><strong>מספר רכב:</strong> {car.mispar_rechev}</div>
-                                <div><strong>יצרן:</strong> {car.tozeret_nm}</div>
-                                <div><strong>דגם:</strong> {car.degem_nm}</div>
-                                <div><strong>שנת יצור:</strong> {car.shnat_yitzur}</div>
-                                <div><strong>צבע:</strong> {car.tzeva_rechev}</div>
-                                <div><strong>דלק:</strong> {car.sug_delek_nm}</div>
-                                <div><strong>טסט בתוקף עד:</strong> {car.tokef_dt}</div>
-                                <div><strong>בעלות:</strong> {car.baalut}</div>
-                                <div><strong>שלדה:</strong> {car.misgeret}</div>
-                                <div><strong>דגם מנוע:</strong> {car.degem_manoa}</div>
-                                <div><strong>קבוצת זיהום:</strong> {car.kvutzat_zihum}</div>
-                                <div><strong>סוג דגם:</strong> {car.sug_degem}</div>
-                                <div><strong>צמיג קדמי:</strong> {car.zmig_kidmi}</div>
-                                <div><strong>צמיג אחורי:</strong> {car.zmig_ahori}</div>
-                                <div><strong>תאריך עלייה לכביש:</strong> {car.moed_aliya_lakvish}</div>
-
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                                {[
+                                    ["מספר רכב", car.mispar_rechev],
+                                    ["יצרן", car.tozeret_nm],
+                                    ["דגם", car.degem_nm],
+                                    ["שנת יצור", car.shnat_yitzur],
+                                    ["צבע", car.tzeva_rechev],
+                                    ["דלק", car.sug_delek_nm],
+                                    ["טסט בתוקף עד", car.tokef_dt],
+                                    ["בעלות", car.baalut],
+                                    ["שלדה", car.misgeret],
+                                    ["דגם מנוע", car.degem_manoa],
+                                    ["קבוצת זיהום", car.kvutzat_zihum],
+                                    ["סוג דגם", car.sug_degem],
+                                    ["צמיג קדמי", car.zmig_kidmi],
+                                    ["צמיג אחורי", car.zmig_ahori],
+                                    ["תאריך עלייה לכביש", car.moed_aliya_lakvish],
+                                ].map(([label, value], idx) => (
+                                    <div key={idx} className="flex justify-between border-b py-1">
+                                        <span className="font-medium text-gray-600">{label}:</span>
+                                        <span className="text-right text-gray-900">{value || "-"}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     ))}
