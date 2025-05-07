@@ -21,11 +21,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// 🔍 Custom global filter function
+// 🔍 Custom global filter function with Unicode normalization
 function globalFilterFn<TData>(row: any, columnId: string, filterValue: string) {
-  return String(row.getValue(columnId))
+  const rowValue = String(row.getValue(columnId))
     .toLowerCase()
-    .includes(filterValue.toLowerCase());
+    .normalize("NFKC");
+  const filter = filterValue.toLowerCase().normalize("NFKC");
+
+  return rowValue.includes(filter);
 }
 
 interface CustomTableProps<TData, TValue> {
