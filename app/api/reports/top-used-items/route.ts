@@ -28,7 +28,7 @@ export async function GET() {
 
   const result = products.map((product) => ({
     ...product.toObject(),
-    usedCount: itemMap[product._id.toString()] || 0,
+    quantity: itemMap[product._id.toString()] || 0,
   }));
 
   return NextResponse.json(result);
