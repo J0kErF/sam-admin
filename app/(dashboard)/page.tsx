@@ -1,53 +1,52 @@
-// ✅ This is a Server Component – do NOT use "use client"
-
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import SalesChart from "@/components/custom ui/SalesChart";
+import { getSalesPerMonth, getTotalCustomers, getTotalSales } from "@/lib/actions/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  getSalesPerMonth,
-  getTotalCustomers,
-  getTotalSales,
-} from "@/lib/actions/actions";
 import { CircleDollarSign, ShoppingBag, UserRound } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import SearchBar from "@/components/custom ui/SearchBar"; // Assuming you place it there
 
-export default async function Home() {
+export default async function Dashboard() {
   const { totalRevenue, totalOrders } = await getTotalSales();
   const totalCustomers = await getTotalCustomers();
   const graphData = await getSalesPerMonth();
 
   return (
-    <div className="px-4 sm:px-6 md:px-10 py-10">
-      <p className="text-heading2-bold text-right">דשבורד</p>
-      <Separator className="bg-grey-1 my-5" />
+    <div className="p-4 md:p-10 max-w-screen-xl mx-auto">
+      <h1 className="text-3xl font-bold text-right mb-4">דשבורד</h1>
+      <SearchBar />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <Separator className="my-6" />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>הכנסות</CardTitle>
-            <CircleDollarSign className="hidden sm:block" />
+            <CircleDollarSign />
           </CardHeader>
           <CardContent>
-            <p className="text-body-bold text-lg">${totalRevenue}</p>
+            <p className="text-xl font-semibold">${totalRevenue.toLocaleString()}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>כל הקניות</CardTitle>
-            <ShoppingBag className="hidden sm:block" />
+            <ShoppingBag />
           </CardHeader>
           <CardContent>
-            <p className="text-body-bold text-lg">{totalOrders}</p>
+            <p className="text-xl font-semibold">{totalOrders}</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row justify-between items-center">
+          <CardHeader className="flex items-center justify-between">
             <CardTitle>משתמשים</CardTitle>
-            <UserRound className="hidden sm:block" />
+            <UserRound />
           </CardHeader>
           <CardContent>
-            <p className="text-body-bold text-lg">{totalCustomers}</p>
+            <p className="text-xl font-semibold">{totalCustomers}</p>
           </CardContent>
         </Card>
       </div>
