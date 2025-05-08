@@ -27,7 +27,7 @@ const LeftSideBar = () => {
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
                 pathname === link.url
                   ? "bg-blue-700 text-white font-semibold"
-                  : "text-blue-100 hover:bg-blue-800 hover:text-white"
+                  : "text-blue-100 hover:bg-gray-700 hover:text-white"
               }`}
             >
               {link.icon}
