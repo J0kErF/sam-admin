@@ -19,10 +19,10 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
     const doc = new jsPDF();
     let yOffset = 20;
     doc.setFont("Alef-Regular");
-
-
     doc.setFontSize(16);
-    doc.text(title, 14, yOffset);
+    //reverse the title to be right aligned
+    const reversedTitle = title.split("").reverse().join("");
+    doc.text(reversedTitle, 14, yOffset, { align: "right" });
 
     yOffset += 10;
 
