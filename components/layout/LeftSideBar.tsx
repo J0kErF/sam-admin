@@ -10,7 +10,7 @@ const LeftSideBar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col justify-between w-64 h-screen px-6 py-8 bg-[#1F2937] text-white shadow-xl">
+    <aside className="hidden lg:flex flex-col justify-between w-64 min-h-screen px-6 py-8 bg-[#1F2937] text-white shadow-xl sticky top-0">
       {/* Logo */}
       <div className="flex justify-center mb-10">
         <Link href="/">
@@ -41,7 +41,7 @@ const LeftSideBar = () => {
 
       {/* User Info */}
       <div className="flex items-center gap-3 px-4 py-3 mt-10 rounded-lg bg-gray-700/50 backdrop-blur-sm">
-        <UserButton afterSignOutUrl="/" />
+        <UserButton />
         <span className="text-sm font-medium text-white">הפרופיל שלי</span>
       </div>
     </aside>
