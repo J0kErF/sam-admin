@@ -4,45 +4,43 @@ import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { navLinks } from "@/lib/constants";
 
 const LeftSideBar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col justify-between w-64 min-h-screen px-6 py-8 bg-[#1F2937] text-white shadow-xl sticky top-0">
+    <aside className="sticky top-0 left-0 h-screen min-w-[230px] bg-blue-900 text-white flex flex-col justify-between px-6 py-8 shadow-xl z-30 max-lg:hidden">
       {/* Logo */}
-      <div className="flex justify-center mb-10">
-        <Link href="/">
-          <Image src="/logo.png" alt="logo" width={60} height={60} className="rounded-md hover:opacity-90 transition" />
+      <div className="flex flex-col gap-10">
+        <Link href="/" className="flex items-center justify-center">
+          <Image src="/logo.png" alt="logo" width={60} height={60} />
         </Link>
-      </div>
 
-      {/* Navigation */}
-      <nav className="flex flex-col gap-3">
-        {navLinks.map((link) => {
-          const isActive = pathname === link.url;
-          return (
+        {/* Nav Links */}
+        <nav className="flex flex-col gap-6">
+          {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.url}
-              className={`flex items-center gap-3 px-4 py-2 rounded-md transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-blue-700 font-semibold shadow"
-                  : "hover:bg-gray-700 hover:text-white"
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
+                pathname === link.url
+                  ? "bg-blue-700 text-white font-semibold"
+                  : "text-blue-100 hover:bg-blue-800 hover:text-white"
               }`}
             >
               {link.icon}
-              <span>{link.label}</span>
+              <span className="text-sm">{link.label}</span>
             </Link>
-          );
-        })}
-      </nav>
+          ))}
+        </nav>
+      </div>
 
-      {/* User Info */}
-      <div className="flex items-center gap-3 px-4 py-3 mt-10 rounded-lg bg-gray-700/50 backdrop-blur-sm">
+      {/* User section */}
+      <div className="mt-6 flex items-center gap-3 px-4 py-3 bg-blue-800 rounded-lg">
         <UserButton />
-        <span className="text-sm font-medium text-white">הפרופיל שלי</span>
+        <span className="text-sm text-white">הפרופיל שלי</span>
       </div>
     </aside>
   );
