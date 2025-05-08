@@ -23,12 +23,14 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={inter.className}>
+        <body className={`${inter.className} bg-white`}>
           <ToasterProvider />
-          <div className="flex max-lg:flex-col text-grey-1">
+          <div className="flex min-h-screen">
             <LeftSideBar />
-            <TopBar />
-            <div className="flex-1">{children}</div>
+            <div className="flex-1 flex flex-col">
+              <TopBar />
+              <main className="flex-1 p-4 overflow-y-auto">{children}</main>
+            </div>
           </div>
         </body>
       </html>
