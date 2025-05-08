@@ -37,24 +37,27 @@ const ProductDetails = ({ params }: { params: { productId: string }}) => {
     const img = new Image();
     img.onload = () => {
       canvas.width = img.width;
-      canvas.height = img.height + 30; // extra space for title text
-      ctx?.fillStyle = "white";
-      ctx?.fillRect(0, 0, canvas.width, canvas.height);
-      ctx?.drawImage(img, 0, 0);
-
-      if (ctx) {
-        ctx.fillStyle = "black";
-        ctx.font = "14px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(productDetails.title, canvas.width / 2, canvas.height - 10);
-      }
-
+      canvas.height = img.height + 30;
+    
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+    
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    
+      ctx.fillStyle = "black";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(productDetails.title, canvas.width / 2, canvas.height - 10);
+    
       const pngFile = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
       downloadLink.download = `${productDetails.title}.png`;
       downloadLink.href = pngFile;
       downloadLink.click();
     };
+    
     img.src = "data:image/svg+xml;base64," + btoa(svgData);
   };
 
