@@ -28,7 +28,7 @@ const ProductDetails = ({ params }: { params: { productId: string }}) => {
   }, [])
 
   const handleDownload = () => {
-    if (!qrRef.current) return;
+    if (!qrRef.current || !productDetails?.title) return;
 
     const svg = qrRef.current;
     const svgData = new XMLSerializer().serializeToString(svg);
@@ -37,11 +37,21 @@ const ProductDetails = ({ params }: { params: { productId: string }}) => {
     const img = new Image();
     img.onload = () => {
       canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.height = img.height + 30; // extra space for title text
+      ctx?.fillStyle = "white";
+      ctx?.fillRect(0, 0, canvas.width, canvas.height);
       ctx?.drawImage(img, 0, 0);
+
+      if (ctx) {
+        ctx.fillStyle = "black";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(productDetails.title, canvas.width / 2, canvas.height - 10);
+      }
+
       const pngFile = canvas.toDataURL("image/png");
       const downloadLink = document.createElement("a");
-      downloadLink.download = `${params.productId}.png`;
+      downloadLink.download = `${productDetails.title}.png`;
       downloadLink.href = pngFile;
       downloadLink.click();
     };
@@ -54,7 +64,7 @@ const ProductDetails = ({ params }: { params: { productId: string }}) => {
       <div className="flex flex-col items-center gap-2 mt-6">
         <p className="text-sm text-gray-500">QR קוד למוצר</p>
         <QRCodeSVG ref={qrRef} value={params.productId} size={150} />
-        <p className="text-xs text-gray-400 break-all">{productDetails?.title}</p>
+        <p className="text-xs text-gray-400 break-all">{params.productId}</p>
         <button
           onClick={handleDownload}
           className="mt-2 px-4 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
