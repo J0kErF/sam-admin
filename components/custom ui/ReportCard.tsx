@@ -1,6 +1,8 @@
 "use client"
 
 import jsPDF from "jspdf";
+import "@/lib/fonts/hebrew-font"; // adjust path
+
 import QRCode from "qrcode";
 import { useState } from "react";
 
@@ -25,6 +27,7 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
     for (const item of data) {
       const qr = await QRCode.toDataURL(item._id || item.title);
 
+      doc.setFont("Alef-Regular");
       doc.setFontSize(12);
       doc.text(`🆔 ${item._id}`, 14, yOffset);
       doc.text(`📦 ${item.title}`, 14, yOffset + 6);
