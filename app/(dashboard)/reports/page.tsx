@@ -1,6 +1,7 @@
 "use client"
 
 import ReportCard from "@/components/custom ui/ReportCard"
+import ReportCardCustomer from "@/components/custom ui/ReportCardCustomer"
 import { useEffect, useState } from "react"
 
 const ReportsPage = () => {
@@ -30,7 +31,7 @@ const ReportsPage = () => {
       <ReportCard title="פריטים עם כמות 0" data={zeroStock} filename="zero-stock" />
       <ReportCard title="פריטים עם פחות מ־5 יחידות" data={lowStock} filename="low-stock" />
       <ReportCard title="הפריטים הכי בשימוש 30 יום אחרונים" data={topUsed} filename="top-used" />
-      <ReportCard title="לקוחות עם הכי הרבה הזמנות" data={topCustomers} filename="top-customers" />
+      <ReportCardCustomer title="לקוחות עם הכי הרבה הזמנות" data={topCustomers} filename="top-customers" />
     </div>
   )
 }
