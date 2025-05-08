@@ -11,7 +11,7 @@ const LeftSideBar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 left-0 h-screen min-w-[230px] bg-blue-900 text-white flex flex-col justify-between px-6 py-8 shadow-xl z-30 max-lg:hidden">
+    <aside className="sticky top-0 left-0 h-screen min-w-[230px] bg-blue-100 text-white flex flex-col justify-between px-6 py-8 shadow-xl z-30 max-lg:hidden">
       {/* Logo */}
       <div className="flex flex-col gap-10">
         <Link href="/" className="flex items-center justify-center">
@@ -26,8 +26,8 @@ const LeftSideBar = () => {
               href={link.url}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
                 pathname === link.url
-                  ? "bg-gray-700 text-white font-semibold"
-                  : "text-blue-100 hover:bg-blue-500 hover:text-white"
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "text-gray-700 hover:bg-blue-500 hover:text-white"
               }`}
             >
               {link.icon}
