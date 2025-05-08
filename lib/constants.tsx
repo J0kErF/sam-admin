@@ -1,6 +1,8 @@
 import {
+  CameraIcon,
   CarIcon,
   LayoutDashboard,
+  NotebookIcon,
   Shapes,
   ShoppingBag,
   Tag,
@@ -8,11 +10,6 @@ import {
 } from "lucide-react";
 
 export const navLinks = [
-  {
-    url: "/",
-    icon: <LayoutDashboard />,
-    label: "עמוד ראשי",
-  },
   {
     url: "/car-search",
     icon: <CarIcon />,
@@ -29,6 +26,11 @@ export const navLinks = [
     label: "מוצרים",
   },
   {
+    url: "/scan",
+    icon: <CameraIcon />,
+    label: "סורק",
+  },
+  {
     url: "/orders",
     icon: <ShoppingBag />,
     label: "טיפולים",
@@ -37,5 +39,10 @@ export const navLinks = [
     url: "/customers",
     icon: <UsersRound />,
     label: "משתמשים",
+  },
+  {
+    url: "/reports",
+    icon: <NotebookIcon />,
+    label: "דוחות",
   },
 ];
