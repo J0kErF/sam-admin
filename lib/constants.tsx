@@ -1,4 +1,5 @@
 import {
+  CarIcon,
   LayoutDashboard,
   Shapes,
   ShoppingBag,
@@ -10,7 +11,12 @@ export const navLinks = [
   {
     url: "/",
     icon: <LayoutDashboard />,
-    label: "דשבורד",
+    label: "עמוד ראשי",
+  },
+  {
+    url: "/car-search",
+    icon: <CarIcon />,
+    label: "איתור רכב",
   },
   {
     url: "/collections",
@@ -25,7 +31,7 @@ export const navLinks = [
   {
     url: "/orders",
     icon: <ShoppingBag />,
-    label: "קניות",
+    label: "טיפולים",
   },
   {
     url: "/customers",
