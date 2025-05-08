@@ -18,6 +18,8 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
   const generatePDF = async () => {
     const doc = new jsPDF();
     let yOffset = 20;
+    doc.setFont("Alef-Regular");
+
 
     doc.setFontSize(16);
     doc.text(title, 14, yOffset);
@@ -27,7 +29,6 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
     for (const item of data) {
       const qr = await QRCode.toDataURL(item._id || item.title);
 
-      doc.setFont("Alef-Regular");
       doc.setFontSize(12);
       doc.text(`🆔 ${item._id}`, 14, yOffset);
       doc.text(`📦 ${item.title}`, 14, yOffset + 6);
