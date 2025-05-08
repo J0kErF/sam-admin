@@ -41,7 +41,7 @@ export const navLinks = [
     label: "משתמשים",
   },
   {
-    url: "/",
+    url: "/reports",
     icon: <NotebookIcon />,
     label: "דוחות",
   },

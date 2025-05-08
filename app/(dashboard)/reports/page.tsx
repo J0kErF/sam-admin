@@ -33,7 +33,7 @@ const ReportsPage = () => {
         </CardHeader>
         <CardContent>
           <Button onClick={() => downloadAsJSON(zeroStock, "zero-stock.json")}>הורד</Button>
-          <p className="text-sm text-gray-500 mt-2">סה"כ: {zeroStock.length} פריטים</p>
+          <p className="text-sm text-gray-500 mt-2">סהכ: {zeroStock.length} פריטים</p>
         </CardContent>
       </Card>
 
@@ -43,7 +43,7 @@ const ReportsPage = () => {
         </CardHeader>
         <CardContent>
           <Button onClick={() => downloadAsJSON(lowStock, "low-stock.json")}>הורד</Button>
-          <p className="text-sm text-gray-500 mt-2">סה"כ: {lowStock.length} פריטים</p>
+          <p className="text-sm text-gray-500 mt-2">סהכ: {lowStock.length} פריטים</p>
         </CardContent>
       </Card>
 
