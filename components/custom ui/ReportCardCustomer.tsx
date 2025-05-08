@@ -43,7 +43,6 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
             yOffset = 30;
           }
       
-          const qr = await QRCode.toDataURL(item._id || item.name);
       
           doc.setDrawColor(220);
           doc.setLineWidth(0.2);
@@ -52,11 +51,10 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
           doc.setFontSize(12);
           doc.setTextColor(20, 20, 20);
       
-          doc.text(`🧾 מספר הזמנות: ${item.ordersCount}`, 180, yOffset + 5, { align: "right" });
-          doc.text(`💰 סה"כ הוצאה: ₪${item.totalSpent.toLocaleString()}`, 180, yOffset + 12, { align: "right" });
-          doc.text(`👤 ${item.name}`, 180, yOffset + 19, { align: "right" });
+          doc.text(`👤 ${item.name}`, 180, yOffset + 5, { align: "right" });
+          doc.text(`📦 מספר הזמנות: ${item.totalOrders}`, 180, yOffset + 12, { align: "right" });
+          
       
-          doc.addImage(qr, "PNG", 14, yOffset, 24, 24);
       
           yOffset += 50;
         }
