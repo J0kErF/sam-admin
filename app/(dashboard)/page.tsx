@@ -19,7 +19,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-export default function Home() {
+export default async function Home() {
   const totalRevenue = await getTotalSales().then((data) => data.totalRevenue);
   const totalOrders = await getTotalSales().then((data) => data.totalOrders);
   const totalCustomers = await getTotalCustomers();
