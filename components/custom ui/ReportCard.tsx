@@ -17,38 +17,54 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
 
   const generatePDF = async () => {
     const doc = new jsPDF();
-    let yOffset = 20;
     doc.setFont("Alef-Regular");
-    doc.setFontSize(16);
-    //reverse the title to be right aligned
-    const reversedTitle = title.split("").reverse().join("");
-    doc.text(reversedTitle, 14, yOffset, { align: "right" });
-
-    yOffset += 10;
-
+    let yOffset = 30;
+  
+    // Page title
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text(title.split("").reverse().join(""), 200, yOffset, {
+      align: "right",
+      maxWidth: 180,
+    });
+  
+    yOffset += 15;
+  
     for (const item of data) {
-      const qr = await QRCode.toDataURL(item._id || item.title);
-
-      doc.setFontSize(12);
-      doc.text(`🆔 ${item._id}`, 14, yOffset);
-      doc.text(`📦 ${item.title}`, 14, yOffset + 6);
-      doc.text(`📉 כמות: ${item.quantity}`, 14, yOffset + 12);
-
-      doc.addImage(qr, "PNG", 150, yOffset - 4, 30, 30);
-
-      yOffset += 40;
-      if (yOffset > 270) {
+      if (yOffset > 260) {
         doc.addPage();
-        yOffset = 20;
+        yOffset = 30;
       }
+  
+      const qr = await QRCode.toDataURL(item._id || item.title);
+  
+      // Box around item
+      doc.setDrawColor(220);
+      doc.setLineWidth(0.2);
+      doc.roundedRect(10, yOffset - 5, 190, 35, 2, 2, "S");
+  
+      // Text content
+      doc.setFontSize(12);
+      doc.setTextColor(20, 20, 20);
+      doc.text(`🆔 ${item._id}`, 180, yOffset + 5, { align: "right" });
+      doc.text(`📦 ${item.title}`, 180, yOffset + 12, { align: "right" });
+      doc.text(`📉 כמות: ${item.quantity}`, 180, yOffset + 19, {
+        align: "right",
+      });
+  
+      // QR code
+      doc.addImage(qr, "PNG", 14, yOffset, 26, 26);
+  
+      yOffset += 45;
     }
-
+  
     const blob = doc.output("blob");
     const blobUrl = URL.createObjectURL(blob);
     setPdfUrl(blobUrl);
-
+  
     doc.save(`${filename}.pdf`);
   };
+  
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-md border">
