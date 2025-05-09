@@ -1,35 +1,26 @@
-import { notFound } from "next/navigation";
+import ProductCard from '@/components/custom ui/ProductCard'
+import { getSearchedProducts } from '@/lib/actions/actions'
 
-export default async function SearchResult({ params }: { params: { query: string } }) {
-  const res = await fetch(`${process.env.ADMIN_DASHBOARD_URL}/api/search/${params.query}`, {
-    cache: "no-store",
-  });
+const SearchPage = async ({ params }: { params: { query: string }}) => {
+  const searchedProducts = await getSearchedProducts(params.query)
 
-  console.log("search result", res);
-  if (!res.ok) return notFound();
-
-  const results = await res.json();
-
-  if (!results?.length) return notFound();
+  const decodedQuery = decodeURIComponent(params.query)
 
   return (
-    <div className="p-6 max-w-screen-lg mx-auto">
-      <h1 className="text-2xl font-bold text-right mb-4">
-        תוצאות חיפוש עבור: <span className="text-blue-600">{params.query}</span>
-      </h1>
-      
-      <ul className="space-y-4">
-        {results.map((item: any) => (
-          <li
-            key={item._id}
-            className="bg-white rounded-xl shadow p-4 border text-right hover:shadow-md transition"
-          >
-            <p className="font-semibold text-lg">{item.title || item.name}</p>
-            <p className="text-sm text-gray-600">{item.description || item.email || "-"}</p>
-            <p className="text-xs text-gray-500">קטגוריה: {item.category || "לא זמין"}</p>
-          </li>
+    <div className='px-10 py-5'>
+      <p className='text-heading3-bold my-10'>תוצאות חיפוש עבור {decodedQuery}</p>
+      {!searchedProducts || searchedProducts.length === 0 && (
+        <p className='text-body-bold my-5'>לא נמצא :\ </p>
+      )}
+      <div className='flex flex-wrap justify-between gap-16'>
+        {searchedProducts?.map((product: ProductType) => (
+          <ProductCard key={product._id} product={product} />
         ))}
-      </ul>
+      </div>
     </div>
-  );
+  )
 }
+
+export const dynamic = "force-dynamic";
+
+export default SearchPage

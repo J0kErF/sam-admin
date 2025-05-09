@@ -2,6 +2,23 @@ import Customer from "../models/Customer";
 import Order from "../models/Order";
 import { connectToDB } from "../mongoDB"
 
+
+export const getSearchedProducts = async (query: string) => {
+  const res = await fetch(
+    `${process.env.ADMIN_DASHBOARD_URL}/api/search/${query}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  if (!res.ok) {
+    console.error("[getSearchedProducts] Failed to fetch");
+    return [];
+  }
+
+  return await res.json();
+};
+
 export const getTotalSales = async () => {
   await connectToDB();
   const orders = await Order.find()
