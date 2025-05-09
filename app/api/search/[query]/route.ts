@@ -1,29 +1,42 @@
 import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
 import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 
-export const GET = async (req: NextRequest, { params }: { params: { query: string }}) => {
+export const GET = async (
+  req: NextRequest,
+  { params }: { params: { query: string } }
+) => {
   try {
-    await connectToDB()
+    await connectToDB();
+    const query = decodeURIComponent(params.query);
+
+    // تحقق إذا الـ query هو ObjectId صالح
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(query);
+
+    const conditions: any[] = [
+      { title: { $regex: query, $options: "i" } },
+      { category: { $regex: query, $options: "i" } },
+      { description: { $regex: query, $options: "i" } },
+      { location: { $regex: query, $options: "i" } },
+    ];
+
+    // فقط أضف البحث بـ ObjectId إذا كانت query صالحة
+    if (isValidObjectId) {
+      conditions.push({ _id: new mongoose.Types.ObjectId(query) });
+      conditions.push({ collections: new mongoose.Types.ObjectId(query) });
+      conditions.push({ tags: new mongoose.Types.ObjectId(query) });
+    }
 
     const searchedProducts = await Product.find({
-      $or: [
-        // I want to check the id as well
-        
-        { title: { $regex: params.query, $options: "i" } },
-        { category: { $regex: params.query, $options: "i" } },
-        { description: { $regex: params.query, $options: "i" } },// $in is used to match an array of values
-        { location: { $in: [new RegExp(params.query, "i")] } }, // $in is used to match an array of values
-        { collections: { $in: [new RegExp(params.query, "i")] } }, // $in is used to match an array of values
-        { tags: { $in: [new RegExp(params.query, "i")] } } // $in is used to match an array of values
-      ]
-    })
+      $or: conditions,
+    });
 
-    return NextResponse.json(searchedProducts, { status: 200 })
+    return NextResponse.json(searchedProducts, { status: 200 });
   } catch (err) {
-    console.log("[search_GET]", err)
-    return new NextResponse("Internal Server Error", { status: 500 })
+    console.log("[search_GET]", err);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
-}
+};
 
 export const dynamic = "force-dynamic";

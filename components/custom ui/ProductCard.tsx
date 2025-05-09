@@ -21,11 +21,11 @@ const ProductCard = ({ product }: ProductCardProps ) => {
       />
       <div>
         <p className="text-base-bold">{product.title}</p>
-        <p className="text-small-medium text-grey-2">{product.category}</p>
+        <p className="text-small-medium">{product.category}</p>
       </div>
       <div className="flex justify-between items-center">
-        <p className="text-small-medium text-grey-2">{product.quantity}</p>
-        <p className="text-small-medium text-grey-2">{product.location}</p>
+        <p className="text-small-medium">{product.quantity}</p>
+        <p className="text-small-medium">{product.location}</p>
         <p className="text-body-bold">₪{product.price}</p>
       </div>
     </Link>
