@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 export default async function SearchResult({ params }: { params: { query: string } }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/search/${params.query}`, {
+  const res = await fetch(`${process.env.ADMIN_DASHBOARD_URL}/api/search/${params.query}`, {
     cache: "no-store",
   });
 
