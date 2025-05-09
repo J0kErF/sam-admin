@@ -5,6 +5,7 @@ export default async function SearchResult({ params }: { params: { query: string
     cache: "no-store",
   });
 
+  console.log("search result", res);
   if (!res.ok) return notFound();
 
   const results = await res.json();
