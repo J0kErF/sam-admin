@@ -1,26 +1,33 @@
 import ProductCard from '@/components/custom ui/ProductCard'
 import { getSearchedProducts } from '@/lib/actions/actions'
 
-const SearchPage = async ({ params }: { params: { query: string }}) => {
-  const searchedProducts = await getSearchedProducts(params.query)
+interface SearchPageProps {
+  params: { query: string }
+}
 
+const SearchPage = async ({ params }: SearchPageProps) => {
   const decodedQuery = decodeURIComponent(params.query)
 
+  const searchedProducts = await getSearchedProducts(decodedQuery)
+
   return (
-    <div className='px-10 py-5'>
-      <p className='text-heading3-bold my-10'>תוצאות חיפוש עבור {decodedQuery}</p>
-      {!searchedProducts || searchedProducts.length === 0 && (
-        <p className='text-body-bold my-5'>לא נמצא :\ </p>
+    <div className='px-4 py-6 max-w-7xl mx-auto'>
+      <h1 className='text-2xl font-bold text-right mb-4'>
+        תוצאות חיפוש עבור: {decodedQuery}
+      </h1>
+
+      {searchedProducts.length === 0 ? (
+        <p className='text-right text-gray-500'>לא נמצאו תוצאות</p>
+      ) : (
+        <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+          {searchedProducts.map((product: any) => (
+            <ProductCard key={product._id} product={product} />
+          ))}
+        </div>
       )}
-      <div className='flex flex-wrap justify-between gap-16'>
-        {searchedProducts?.map((product: ProductType) => (
-          <ProductCard key={product._id} product={product} />
-        ))}
-      </div>
     </div>
   )
 }
 
-export const dynamic = "force-dynamic";
-
+export const dynamic = 'force-dynamic'
 export default SearchPage

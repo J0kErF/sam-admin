@@ -4,20 +4,20 @@ import { connectToDB } from "../mongoDB"
 
 
 export const getSearchedProducts = async (query: string) => {
-  const res = await fetch(
-    `${process.env.ADMIN_DASHBOARD_URL}/api/search/${query}`,
-    {
-      cache: "no-store",
-    }
-  );
+  try {
+    const res = await fetch(`${process.env.ADMIN_DASHBOARD_URL}/api/search/${query}`, {
+      cache: "no-store"
+    });
 
-  if (!res.ok) {
-    console.error("[getSearchedProducts] Failed to fetch");
+    if (!res.ok) throw new Error("Failed to fetch");
+
+    return await res.json();
+  } catch (err) {
+    console.error("[getSearchedProducts]", err);
     return [];
   }
-
-  return await res.json();
 };
+
 
 export const getTotalSales = async () => {
   await connectToDB();
