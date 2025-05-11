@@ -21,33 +21,7 @@ const TopBar = () => {
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const pathname = usePathname();
 
-  // Register service worker
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/service-worker.js")
-        .then(() => console.log("✅ Service Worker Registered"))
-        .catch((err) => console.error("❌ SW Registration Failed", err));
-    }
-  }, []);
 
-  // Listen for the install prompt
-  useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
-
-  // Handle PWA install
-  const handleInstall = () => {
-    if (installPrompt) {
-      installPrompt.prompt();
-      installPrompt.userChoice.then(() => setInstallPrompt(null));
-    }
-  };
 
   return (
     <header className="sticky top-0 z-30 w-full flex justify-between items-center px-4 py-3 bg-white shadow-md border-b border-gray-200 lg:hidden">
@@ -67,16 +41,7 @@ const TopBar = () => {
 
         {dropdownMenu && (
           <div className="absolute top-12 right-0 w-56 bg-white rounded-xl shadow-xl border border-gray-100 p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 rtl">
-            {installPrompt && (
-              <button
-                onClick={handleInstall}
-                className="flex items-center justify-end gap-3 px-2 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all"
-              >
-                <span>התקן אפליקציה</span>
-                <Download className="w-5 h-5" />
-              </button>
-            )}
-
+            
             {navLinks.map((link) => {
               const isActive = pathname === link.url;
               return (
