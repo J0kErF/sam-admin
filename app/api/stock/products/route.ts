@@ -12,17 +12,19 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query") || "";
 
-    const isValidObjectId = query.match(/^[0-9a-fA-F]{24}$/);
+    const regexQuery = new RegExp(query, "i");
 
-    const filter = {
-      $or: [
-        ...(isValidObjectId ? [{ _id: query }] : []),
-        { title: { $regex: query, $options: "i" } },
-        { location: { $regex: query, $options: "i" } },
-      ],
-    };
+    const filter = query
+      ? {
+          $or: [
+            { _id: { $regex: regexQuery } }, // treat ID as string for partial match
+            { title: { $regex: regexQuery } },
+            { location: { $regex: regexQuery } },
+          ],
+        }
+      : {};
 
-    const products = await Product.find(query ? filter : {});
+    const products = await Product.find(filter);
 
     return NextResponse.json(products);
   } catch (error) {
