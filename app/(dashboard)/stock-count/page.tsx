@@ -9,7 +9,7 @@ interface Product {
   _id: string;
   title: string;
   quantity: number;
-  image: string;
+  media: string[];
   location: string[];
 }
 
@@ -79,7 +79,7 @@ export default function StockCountPage() {
           >
             <div className="flex items-center gap-4">
               <Image
-                src={product.image}
+                src={product.media[0]}
                 alt={product.title}
                 width={80}
                 height={80}
