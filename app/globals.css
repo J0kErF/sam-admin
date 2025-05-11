@@ -8,3 +8,43 @@ body,
   height: 75%;
   font-family: 'Alef', sans-serif;
 }
+
+/* globals.css or inside a module if using CSS modules */
+
+#qr-reader {
+  border: none !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  background-color: #f9f9f9;
+}
+
+/* Style dropdown and buttons */
+#qr-reader__dashboard select,
+#qr-reader__dashboard button {
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
+  background-color: white;
+  border: 1px solid #ccc;
+  margin: 0.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+#qr-reader__dashboard button:hover {
+  background-color: #1e40af;
+  color: white;
+}
+
+#qr-reader__scan_region img {
+  border-radius: 0.5rem;
+}
+
+#qr-reader__header_message {
+  display: none; /* Hide info if not needed */
+}
+#qr-reader__dashboard .reader-info {
+  display: none;
+}
+

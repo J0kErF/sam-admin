@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useRouter } from "next/navigation";
-import { Loader } from "lucide-react";
 
 export default function QrCodeScanPage() {
   const qrRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const [scanning, setScanning] = useState(true);
 
   useEffect(() => {
     if (!qrRef.current) return;
@@ -17,8 +15,7 @@ export default function QrCodeScanPage() {
       "qr-reader",
       {
         fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
+        qrbox: 250,
       },
       false
     );
@@ -30,12 +27,11 @@ export default function QrCodeScanPage() {
         } else {
           router.push(`/products/${decodedText}`);
         }
-        scanner.clear();
-        setScanning(false);
+
+        scanner.clear(); // stop scanning
       },
       (error) => {
-        // You can show the error or ignore it for smoother UX
-        console.warn("QR scan error:", error);
+        console.warn(error);
       }
     );
 
@@ -44,27 +40,35 @@ export default function QrCodeScanPage() {
     };
   }, [router]);
 
+  // ✨ Custom UI Texts
+  useEffect(() => {
+    const customizeUI = () => {
+      const dropdown = document.querySelector("#qr-reader__dashboard select");
+      if (dropdown) dropdown.previousSibling!.textContent = "בחר מצלמה";
+
+      const scanButton = document.querySelector(
+        "#qr-reader__dashboard button"
+      ) as HTMLButtonElement;
+      if (scanButton) scanButton.textContent = "התחל סריקה";
+
+      const upload = document.querySelector(
+        "#qr-reader__dashboard a"
+      ) as HTMLAnchorElement;
+      if (upload) upload.textContent = "סרוק תמונה";
+    };
+
+    const interval = setInterval(() => {
+      if (document.querySelector("#qr-reader__dashboard")) {
+        customizeUI();
+        clearInterval(interval);
+      }
+    }, 200);
+  }, []);
+
   return (
-    <div className="min-h-[80vh] flex flex-col justify-center items-center p-6">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">סריקת קוד QR</h1>
-        <p className="text-gray-500 text-sm mt-2">
-          הכנס את הקוד לתוך הריבוע והמתן לזיהוי אוטומטי
-        </p>
-      </div>
-
-      <div
-        id="qr-reader"
-        ref={qrRef}
-        className="w-full max-w-sm rounded-lg border border-gray-300 shadow-md"
-      />
-
-      {scanning && (
-        <div className="mt-6 flex items-center gap-2 text-blue-600 animate-pulse">
-          <Loader className="w-5 h-5 animate-spin" />
-          <span>ממתין לסריקה...</span>
-        </div>
-      )}
+    <div className="p-6 max-w-md mx-auto text-center">
+      <h1 className="text-xl font-bold mb-4">סרוק קוד QR</h1>
+      <div id="qr-reader" ref={qrRef} className="w-full rounded shadow" />
     </div>
   );
 }
