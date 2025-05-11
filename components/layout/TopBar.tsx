@@ -3,15 +3,31 @@
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
-
 import { navLinks } from "@/lib/constants";
 
 const TopBar = () => {
   const [dropdownMenu, setDropdownMenu] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      installPrompt.userChoice.then(() => setInstallPrompt(null));
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 w-full flex justify-between items-center px-4 py-3 bg-white shadow-md border-b border-gray-200 lg:hidden">
@@ -22,6 +38,14 @@ const TopBar = () => {
 
       {/* Mobile Menu & User */}
       <div className="relative flex items-center gap-4">
+        {installPrompt && (
+          <button
+            onClick={handleInstall}
+            className="text-sm bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition"
+          >
+            התקן אפליקציה
+          </button>
+        )}
         <Menu
           className="w-6 h-6 text-gray-700 cursor-pointer"
           onClick={() => setDropdownMenu((prev) => !prev)}
