@@ -6,6 +6,5 @@ html,
 body,
 :root {
   height: 75%;
-  direction: rtl;
   font-family: 'Alef', sans-serif;
 }
