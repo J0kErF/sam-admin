@@ -1,4 +1,3 @@
-// File: app/api/stock/products/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
@@ -15,12 +14,12 @@ export async function GET(req: NextRequest) {
 
     const regex = new RegExp(query, "i");
 
-    const filters = [
+    const filters: any[] = [
       { title: { $regex: regex } },
       { location: { $regex: regex } },
     ];
 
-    // Add _id condition if the query is a valid ObjectId
+    // Add _id only if valid
     if (mongoose.Types.ObjectId.isValid(query)) {
       filters.push({ _id: new mongoose.Types.ObjectId(query) });
     }
