@@ -45,6 +45,22 @@ export default function StockCountPage() {
   };
 
   useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchValue.trim()) {
+        fetchProducts();
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchValue]);
+
+  useEffect(() => {
+    if (!searchValue) {
+      fetchProducts();
+    }
+  }, []);
+
+  useEffect(() => {
     if (showScanner) {
       const scanner = new Html5QrcodeScanner("qr-reader", {
         fps: 10,
@@ -78,13 +94,6 @@ export default function StockCountPage() {
           placeholder="הכנס מזהה / שם / מיקום"
           className="border rounded p-2 w-full text-right"
         />
-
-        <button
-          onClick={fetchProducts}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          חפש
-        </button>
 
         <button
           onClick={() => setShowScanner(true)}

@@ -12,17 +12,24 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query") || "";
 
-    const isValidObjectId = query.match(/^[0-9a-fA-F]{24}$/);
+    let products;
 
-    const filter = {
-      $or: [
-        ...(isValidObjectId ? [{ _id: query }] : []),
-        { title: { $regex: query, $options: "i" } },
-        { location: { $regex: query, $options: "i" } },
-      ],
-    };
+    if (!query) {
+      // Return all products if no query is given
+      products = await Product.find({});
+    } else {
+      const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(query);
 
-    const products = await Product.find(query ? filter : {});
+      const filter = {
+        $or: [
+          ...(isValidObjectId ? [{ _id: query }] : []),
+          { title: { $regex: query, $options: "i" } },
+          { location: { $regex: query, $options: "i" } },
+        ],
+      };
+
+      products = await Product.find(filter);
+    }
 
     return NextResponse.json(products);
   } catch (error) {
