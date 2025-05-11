@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const filter = {
       $or: [
-        ...(isValidObjectId ? [{ _id: { $regex: query, $options: "i" } }] : []),
+        ...(isValidObjectId ? [{ _id: query }] : []),
         { title: { $regex: query, $options: "i" } },
         { location: { $regex: query, $options: "i" } },
       ],
