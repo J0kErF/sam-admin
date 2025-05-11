@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
+import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
 
@@ -10,19 +11,21 @@ export async function GET(req: NextRequest) {
     await connectToDB();
 
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get("query") || "";
+    const query = searchParams.get("query")?.trim() || "";
 
-    const isValidObjectId = query.match(/^[0-9a-fA-F]{24}$/);
+    const regex = new RegExp(query, "i");
 
-    const filter = {
-      $or: [
-        ...(isValidObjectId ? [{ _id: query }] : []),
-        { title: { $regex: query, $options: "i" } },
-        { location: { $regex: query, $options: "i" } },
-      ],
-    };
+    const filters = [
+      { title: { $regex: regex } },
+      { location: { $regex: regex } },
+    ];
 
-    const products = await Product.find(query ? filter : {});
+    // Add _id condition if the query is a valid ObjectId
+    if (mongoose.Types.ObjectId.isValid(query)) {
+      filters.push({ _id: new mongoose.Types.ObjectId(query) });
+    }
+
+    const products = await Product.find(query ? { $or: filters } : {}).lean();
 
     return NextResponse.json(products);
   } catch (error) {

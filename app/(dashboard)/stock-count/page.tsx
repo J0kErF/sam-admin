@@ -16,7 +16,6 @@ interface ProductType {
 
 export default function StockCountPage() {
   const [searchValue, setSearchValue] = useState("");
-  const [searchType, setSearchType] = useState("location");
   const [products, setProducts] = useState<ProductType[]>([]);
   const [counted, setCounted] = useState<{ [id: string]: boolean }>({});
   const [showScanner, setShowScanner] = useState(false);
@@ -50,7 +49,7 @@ export default function StockCountPage() {
       const scanner = new Html5QrcodeScanner("qr-reader", {
         fps: 10,
         qrbox: 250,
-      },false);
+      }, false);
 
       scanner.render(
         (decodedText) => {
@@ -72,21 +71,11 @@ export default function StockCountPage() {
       <h1 className="text-2xl font-bold text-right mb-6">ספירת מלאי</h1>
 
       <div className="flex gap-3 items-center mb-6">
-        <select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-          className="border rounded p-2"
-        >
-          <option value="_id">לפי מזהה</option>
-          <option value="title">לפי שם</option>
-          <option value="location">לפי מיקום</option>
-        </select>
-
         <input
           type="text"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="הכנס ערך לחיפוש"
+          placeholder="הכנס מזהה / שם / מיקום"
           className="border rounded p-2 w-full text-right"
         />
 
