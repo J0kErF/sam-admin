@@ -1,18 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { navLinks } from "@/lib/constants";
 
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+};
+
 const TopBar = () => {
   const [dropdownMenu, setDropdownMenu] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const pathname = usePathname();
 
+  // Register service worker
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then(() => console.log("✅ Service Worker Registered"))
+        .catch((err) => console.error("❌ SW Registration Failed", err));
+    }
+  }, []);
+
+  // Listen for the install prompt
   useEffect(() => {
     const handler = (e: any) => {
       e.preventDefault();
@@ -22,6 +41,7 @@ const TopBar = () => {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  // Handle PWA install
   const handleInstall = () => {
     if (installPrompt) {
       installPrompt.prompt();
@@ -36,7 +56,7 @@ const TopBar = () => {
         <Image src="/icons/icon-192.png" alt="logo" width={50} height={50} />
       </Link>
 
-      {/* Mobile Menu & User */}
+      {/* Install + Menu + User */}
       <div className="relative flex items-center gap-4">
         {installPrompt && (
           <button
@@ -46,10 +66,12 @@ const TopBar = () => {
             התקן אפליקציה
           </button>
         )}
+
         <Menu
           className="w-6 h-6 text-gray-700 cursor-pointer"
           onClick={() => setDropdownMenu((prev) => !prev)}
         />
+
         {dropdownMenu && (
           <div className="absolute top-12 right-0 w-56 bg-white rounded-lg shadow-lg border border-gray-100 p-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2">
             {navLinks.map((link) => {
@@ -72,6 +94,7 @@ const TopBar = () => {
             })}
           </div>
         )}
+
         <UserButton />
       </div>
     </header>
