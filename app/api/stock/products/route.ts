@@ -1,7 +1,7 @@
+// File: app/api/stock/products/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
-import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
 
@@ -10,21 +10,19 @@ export async function GET(req: NextRequest) {
     await connectToDB();
 
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get("query")?.trim() || "";
+    const query = searchParams.get("query") || "";
 
-    const regex = new RegExp(query, "i");
+    const isValidObjectId = query.match(/^[0-9a-fA-F]{24}$/);
 
-    const filters: any[] = [
-      { title: { $regex: regex } },
-      { location: { $regex: regex } },
-    ];
+    const filter = {
+      $or: [
+        ...(isValidObjectId ? [{ _id: query }] : []),
+        { title: { $regex: query, $options: "i" } },
+        { location: { $regex: query, $options: "i" } },
+      ],
+    };
 
-    // Add _id only if valid
-    if (mongoose.Types.ObjectId.isValid(query)) {
-      filters.push({ _id: new mongoose.Types.ObjectId(query) });
-    }
-
-    const products = await Product.find(query ? { $or: filters } : {}).lean();
+    const products = await Product.find(query ? filter : {});
 
     return NextResponse.json(products);
   } catch (error) {
