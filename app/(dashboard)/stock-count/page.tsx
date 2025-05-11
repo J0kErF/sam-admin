@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Html5QrcodeScanner } from "html5-qrcode";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
@@ -16,14 +16,15 @@ interface ProductType {
 
 export default function StockCountPage() {
   const [searchValue, setSearchValue] = useState("");
+  const [searchType, setSearchType] = useState("location");
   const [products, setProducts] = useState<ProductType[]>([]);
   const [counted, setCounted] = useState<{ [id: string]: boolean }>({});
-  const router = useRouter();
+  const [showScanner, setShowScanner] = useState(false);
 
   const fetchProducts = async () => {
     try {
-      const query = encodeURIComponent(searchValue.trim());
-      const res = await fetch(`/api/stock/products?query=${query}`);
+      const res = await fetch(`/api/stock/products?query=${encodeURIComponent(searchValue)}`);
+      if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setProducts(data);
     } catch (err) {
@@ -35,51 +36,94 @@ export default function StockCountPage() {
     try {
       await axios.post("/api/stock/count", {
         productId,
+        isCounted: true,
         date: new Date(),
       });
       setCounted((prev) => ({ ...prev, [productId]: true }));
     } catch (err) {
-      console.error("Failed to update stock count:", err);
+      console.error("Failed to update count status:", err);
     }
   };
 
   useEffect(() => {
-    if (!searchValue) {
-      fetchProducts();
+    if (showScanner) {
+      const scanner = new Html5QrcodeScanner("qr-reader", {
+        fps: 10,
+        qrbox: 250,
+      });
+
+      scanner.render(
+        (decodedText) => {
+          setSearchValue(decodedText);
+          setShowScanner(false);
+          scanner.clear();
+        },
+        (error) => console.warn("QR error:", error)
+      );
+
+      return () => {
+        scanner.clear().catch(console.error);
+      };
     }
-  }, [searchValue]);
+  }, [showScanner]);
 
   return (
     <div className="p-6 max-w-screen-lg mx-auto">
       <h1 className="text-2xl font-bold text-right mb-6">ספירת מלאי</h1>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6 items-end">
+      <div className="flex gap-3 items-center mb-6">
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          className="border rounded p-2"
+        >
+          <option value="_id">לפי מזהה</option>
+          <option value="title">לפי שם</option>
+          <option value="location">לפי מיקום</option>
+        </select>
+
         <input
           type="text"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="חיפוש לפי מזהה, שם, או מיקום"
+          placeholder="הכנס ערך לחיפוש"
           className="border rounded p-2 w-full text-right"
         />
+
         <button
           onClick={fetchProducts}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
           חפש
         </button>
+
+        <button
+          onClick={() => setShowScanner(true)}
+          className="bg-gray-200 text-sm p-2 rounded hover:bg-gray-300"
+          title="סרוק QR"
+        >
+          📷
+        </button>
       </div>
 
+      {showScanner && (
+        <div className="mb-6 border rounded p-4 bg-white shadow">
+          <p className="mb-2 text-right font-medium">כוון את המצלמה לקוד QR</p>
+          <div id="qr-reader" className="w-full max-w-md mx-auto" />
+        </div>
+      )}
+
       {products.length === 0 ? (
-        <p className="text-center text-gray-500">אין תוצאות להצגה</p>
+        <p className="text-center text-gray-500">אין תוצאות</p>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
           {products.map((product) => (
             <div
               key={product._id}
-              className="border rounded-lg p-4 flex flex-col items-end shadow bg-white"
+              className="border rounded-lg p-4 flex flex-col items-end shadow"
             >
               <Image
-                src={product.media?.[0] || "/no-image.png"}
+                src={product.media[0] || "/no-image.png"}
                 alt={product.title}
                 width={100}
                 height={100}
@@ -95,7 +139,7 @@ export default function StockCountPage() {
               <p className="text-sm text-gray-600">
                 מיקומים: {product.location.join(", ")}
               </p>
-              <label className="mt-3 inline-flex items-center gap-2">
+              <label className="mt-2 inline-flex items-center gap-2">
                 <input
                   type="checkbox"
                   checked={!!counted[product._id]}
