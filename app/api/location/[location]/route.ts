@@ -1,18 +1,23 @@
-// Route handler - GET all products by location (e.g., /api/location/[location])
-
+import { NextRequest, NextResponse } from "next/server";
 import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
-import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params: { location: string } }) {
+export async function GET(req: NextRequest) {
   try {
     await connectToDB();
-    const location = decodeURIComponent(params.location);
 
-    const products = await Product.find({ location: { $regex: location, $options: "i" } });
-    return NextResponse.json(products);
+    const { searchParams } = new URL(req.url);
+    const location = searchParams.get("location");
+
+    const query = location
+      ? { location: { $regex: location, $options: "i" } }
+      : {}; // If no location is provided, fetch all products
+
+    const products = await Product.find(query);
+
+    return NextResponse.json(products, { status: 200 });
   } catch (error) {
-    console.error("[location_GET]", error);
-    return new NextResponse("Error fetching products by location", { status: 500 });
+    console.error("[GET_PRODUCTS_BY_LOCATION]", error);
+    return new NextResponse("Error fetching products", { status: 500 });
   }
 }

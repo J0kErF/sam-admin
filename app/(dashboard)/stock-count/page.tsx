@@ -4,107 +4,114 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import axios from "axios";
 
-interface Product {
+interface ProductType {
   _id: string;
   title: string;
-  quantity: number;
   media: string[];
+  quantity: number;
   location: string[];
 }
 
 export default function StockCountPage() {
-  const [locationQuery, setLocationQuery] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
-  const [counted, setCounted] = useState<Record<string, boolean>>({});
-  const [loading, setLoading] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchType, setSearchType] = useState("location");
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [counted, setCounted] = useState<{ [id: string]: boolean }>({});
+  const router = useRouter();
 
   const fetchProducts = async () => {
-    setLoading(true);
     try {
-      const res = await fetch(`/api/location/${locationQuery}`);
+      const res = await fetch(`/api/stock/products?${searchType}=${searchValue}`);
       const data = await res.json();
       setProducts(data);
     } catch (err) {
-      console.error("Error fetching products:", err);
-    } finally {
-      setLoading(false);
+      console.error("Failed to fetch products:", err);
     }
   };
 
-  const handleToggleCount = async (productId: string) => {
+  const markAsCounted = async (productId: string) => {
     try {
-      await fetch("/api/stock/count", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId }),
+      await axios.post("/api/stock/count", {
+        productId,
+        isCounted: true,
+        date: new Date(),
       });
       setCounted((prev) => ({ ...prev, [productId]: true }));
     } catch (err) {
-      console.error("Error updating count status:", err);
+      console.error("Failed to update count status:", err);
     }
   };
 
   return (
-    <div className="max-w-screen-lg mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 text-right">בדיקת מלאי לפי מיקום</h1>
+    <div className="p-6 max-w-screen-lg mx-auto">
+      <h1 className="text-2xl font-bold text-right mb-6">ספירת מלאי</h1>
 
-      <div className="flex gap-4 mb-6 justify-end">
+      <div className="flex gap-4 mb-6">
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          className="border rounded p-2"
+        >
+          <option value="_id">לפי מזהה</option>
+          <option value="title">לפי שם</option>
+          <option value="location">לפי מיקום</option>
+        </select>
         <input
           type="text"
-          value={locationQuery}
-          onChange={(e) => setLocationQuery(e.target.value)}
-          placeholder="הזן מיקום (לדוג' A-0-0)"
-          className="border rounded px-4 py-2 w-full max-w-xs text-right"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          placeholder="הכנס ערך לחיפוש"
+          className="border rounded p-2 w-full text-right"
         />
         <button
           onClick={fetchProducts}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="bg-blue-600 text-white px-4 rounded hover:bg-blue-700"
         >
           חפש
         </button>
       </div>
 
-      {loading && <p className="text-center">טוען תוצאות...</p>}
-
-      {!loading && products.length === 0 && (
-        <p className="text-center text-gray-500">לא נמצאו פריטים במיקום הזה</p>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {products.map((product) => (
-          <div
-            key={product._id}
-            className="border rounded-xl p-4 shadow flex items-center gap-4 justify-between"
-          >
-            <div className="flex items-center gap-4">
+      {products.length === 0 ? (
+        <p className="text-center text-gray-500">אין תוצאות</p>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          {products.map((product) => (
+            <div
+              key={product._id}
+              className="border rounded-lg p-4 flex flex-col items-end shadow"
+            >
               <Image
-                src={product.media[0]}
+                src={product.media[0] || "/no-image.png"}
                 alt={product.title}
-                width={80}
-                height={80}
-                className="rounded object-cover"
+                width={100}
+                height={100}
+                className="rounded object-cover mb-3"
               />
-              <div className="text-right">
-                <Link
-                  href={`/products/${product._id}`}
-                  className="text-blue-600 hover:underline block font-semibold"
-                >
-                  {product.title}
-                </Link>
-                <p className="text-sm text-gray-700">כמות: {product.quantity}</p>
-                <p className="text-xs text-gray-500">מיקומים: {product.location.join(", ")}</p>
-              </div>
+              <Link
+                href={`/products/${product._id}`}
+                className="text-blue-600 font-bold hover:underline text-right"
+              >
+                {product.title}
+              </Link>
+              <p className="text-sm text-gray-600">כמות: {product.quantity}</p>
+              <p className="text-sm text-gray-600">
+                מיקומים: {product.location.join(", ")}
+              </p>
+              <label className="mt-2 inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={!!counted[product._id]}
+                  onChange={() => markAsCounted(product._id)}
+                  className="accent-blue-600"
+                />
+                <span className="text-sm">נספר</span>
+              </label>
             </div>
-            <input
-              type="checkbox"
-              checked={!!counted[product._id]}
-              onChange={() => handleToggleCount(product._id)}
-              className="h-5 w-5 text-blue-600"
-            />
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
