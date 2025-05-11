@@ -1,5 +1,4 @@
 // File: app/api/stock/products/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
@@ -11,27 +10,23 @@ export async function GET(req: NextRequest) {
     await connectToDB();
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get("_id");
-    const title = searchParams.get("title");
-    const location = searchParams.get("location");
+    const query = searchParams.get("query") || "";
 
-    let query = {};
+    const isValidObjectId = query.match(/^[0-9a-fA-F]{24}$/);
 
-    if (id) {
-      query = { _id: { $regex: id, $options: "i" } }; 
-    } else if (title) {
-      query = { title: { $regex: title, $options: "i" } };
-    } else if (location) {
-      query = { location: { $regex: location, $options: "i" } };
-    }
+    const filter = {
+      $or: [
+        ...(isValidObjectId ? [{ _id: query }] : []),
+        { title: { $regex: query, $options: "i" } },
+        { location: { $regex: query, $options: "i" } },
+      ],
+    };
 
-    const products = Object.keys(query).length
-      ? await Product.find(query)
-      : await Product.find({}); // fallback to all if no param
+    const products = await Product.find(query ? filter : {});
 
     return NextResponse.json(products);
   } catch (error) {
-    console.error("[GET_PRODUCTS]", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    console.error("[STOCK_PRODUCTS_GET]", error);
+    return new NextResponse("Failed to fetch products", { status: 500 });
   }
 }
