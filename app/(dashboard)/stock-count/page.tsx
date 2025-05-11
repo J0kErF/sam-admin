@@ -50,7 +50,7 @@ export default function StockCountPage() {
       const scanner = new Html5QrcodeScanner("qr-reader", {
         fps: 10,
         qrbox: 250,
-      });
+      },false);
 
       scanner.render(
         (decodedText) => {
