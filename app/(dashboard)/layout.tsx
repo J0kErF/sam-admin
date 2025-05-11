@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   title: "סמיח מזגנים - מערכת ניהול",
   keywords: ["סמיח מזגנים", "מערכת ניהול", "סמיח", "מזגנים"],
   description: "Admin dashboard to manage sameeh mazganem's data",
+  manifest: "/manifest.json"
 };
 
 export default function RootLayout({
@@ -23,6 +24,11 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <head>
+          <link rel="manifest" href="/manifest.json" />
+          <meta name="theme-color" content="#1e40af" />
+          <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        </head>
         <body className={`${inter.className} bg-white`}>
           <ToasterProvider />
           <div className="flex min-h-screen">
