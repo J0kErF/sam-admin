@@ -15,7 +15,7 @@ const LeftSideBar = () => {
       {/* Logo */}
       <div className="flex flex-col gap-10">
         <Link href="/" className="flex items-center justify-center">
-          <Image src="/logo.png" alt="logo" width={60} height={60} />
+          <Image src="/icons/icon-512.png" alt="logo" width={60} height={60} />
         </Link>
 
         {/* Nav Links */}

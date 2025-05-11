@@ -17,7 +17,7 @@ const TopBar = () => {
     <header className="sticky top-0 z-30 w-full flex justify-between items-center px-4 py-3 bg-white shadow-md border-b border-gray-200 lg:hidden">
       {/* Logo */}
       <Link href="/" className="hover:opacity-90 transition">
-        <Image src="/logo.png" alt="logo" width={45} height={45} />
+        <Image src="/icons/icon-192.png" alt="logo" width={50} height={50} />
       </Link>
 
       {/* Mobile Menu & User */}
