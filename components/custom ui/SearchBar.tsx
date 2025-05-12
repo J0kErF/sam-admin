@@ -20,7 +20,7 @@ export default function SearchBar() {
     <form onSubmit={handleSearch} className="flex items-center justify-end gap-2">
       <Input
         type="text"
-        placeholder="חפש מוצר או לקוח..."
+        placeholder="חפש מוצר ..."
         className="w-full sm:w-64 rtl text-right"
         value={query}
         onChange={(e) => setQuery(e.target.value)}

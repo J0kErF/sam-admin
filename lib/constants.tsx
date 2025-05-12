@@ -1,6 +1,7 @@
 import {
   CameraIcon,
   CarIcon,
+  ClipboardSignature,
   LayoutDashboard,
   NotebookIcon,
   Shapes,
@@ -39,6 +40,11 @@ export const navLinks = [
     url: "/customers",
     icon: <UsersRound />,
     label: "משתמשים",
+  },
+  {
+    url: "/stock-count",
+    icon: <ClipboardSignature />,
+    label: "ספירת מלאי",
   },
   {
     url: "/reports",
