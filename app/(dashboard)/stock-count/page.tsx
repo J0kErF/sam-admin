@@ -46,9 +46,7 @@ export default function StockCountPage() {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if (searchValue.trim()) {
         fetchProducts();
-      }
     }, 400);
 
     return () => clearTimeout(delayDebounce);
@@ -90,7 +88,7 @@ export default function StockCountPage() {
         <input
           type="text"
           value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
+          onChange={(e) => setSearchValue(e.target.value) }
           placeholder="הכנס מזהה / שם / מיקום"
           className="border rounded p-2 w-full text-right"
         />
