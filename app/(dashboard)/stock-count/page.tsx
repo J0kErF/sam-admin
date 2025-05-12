@@ -154,7 +154,7 @@ export default function StockCountPage() {
               <label className="mt-2 inline-flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={!!counted[product._id]}
+                  checked={!counted[product._id]}
                   onChange={() => markAsCounted(product._id)}
                   className="accent-blue-600"
                 />
