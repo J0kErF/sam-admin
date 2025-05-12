@@ -4,6 +4,7 @@ import ReportCard from "@/components/custom ui/ReportCard"
 import ReportCardCustomer from "@/components/custom ui/ReportCardCustomer"
 import LocationReportCard from "@/components/custom ui/LocationReportCard"
 import { useEffect, useState } from "react"
+import ProductsCard from "@/components/custom ui/ProductsCard"
 
 const ReportsPage = () => {
   const [zeroStock, setZeroStock] = useState<any[]>([])
@@ -30,6 +31,7 @@ const ReportsPage = () => {
   return (
     <div className="p-10 grid grid-cols-1 md:grid-cols-2 gap-6">
       <LocationReportCard title="מיקומים" filename="locations" />
+      <ProductsCard title="מוצרים" filename="products" />
       <ReportCard title="פריטים עם כמות 0" data={zeroStock} filename="zero-stock" />
       <ReportCard title="פריטים עם פחות מ־5 יחידות" data={lowStock} filename="low-stock" />
       <ReportCard title="הפריטים הכי בשימוש 30 יום אחרונים" data={topUsed} filename="top-used" />
