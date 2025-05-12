@@ -12,6 +12,7 @@ interface ProductType {
   media: string[];
   quantity: number;
   location: string[];
+  lastCountedAt?: string; // optional, ISO date string
 }
 
 export default function StockCountPage() {
@@ -25,6 +26,21 @@ export default function StockCountPage() {
       const res = await fetch(`/api/stock/products?query=${encodeURIComponent(searchValue)}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
+
+      // Determine if each product was counted this month
+      const now = new Date();
+      const countedMap: { [id: string]: boolean } = {};
+      data.forEach((product: ProductType) => {
+        const lastCounted = product.lastCountedAt ? new Date(product.lastCountedAt) : null;
+        if (
+          lastCounted &&
+          lastCounted.getMonth() === now.getMonth() &&
+          lastCounted.getFullYear() === now.getFullYear()
+        ) {
+          countedMap[product._id] = true;
+        }
+      });
+      setCounted(countedMap);
       setProducts(data);
     } catch (err) {
       console.error("Failed to fetch products:", err);
