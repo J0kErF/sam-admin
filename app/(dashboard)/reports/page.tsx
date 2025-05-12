@@ -35,7 +35,7 @@ const ReportsPage = () => {
       <ReportCard title="פריטים עם כמות 0" data={zeroStock} filename="zero-stock" />
       <ReportCard title="פריטים עם פחות מ־5 יחידות" data={lowStock} filename="low-stock" />
       <ReportCard title="הפריטים הכי בשימוש 30 יום אחרונים" data={topUsed} filename="top-used" />
-      <ReportCardCustomer title="משתמשים עם הכי הרבה טיפןלים" data={topCustomers} filename="top-customers" />
+      <ReportCardCustomer title="משתמשים עם הכי הרבה טיפולים" data={topCustomers} filename="top-customers" />
     </div>
   )
 }
