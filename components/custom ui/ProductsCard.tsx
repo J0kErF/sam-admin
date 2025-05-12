@@ -38,7 +38,7 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
       const product = products[i];
       const name =
         typeof product.title === "string"
-          ? product.title.reverse()
+          ? product.title.split("").reverse().join("")
           : "ללא שם";
       const id = product._id || product.id || "ללא מזהה";
 
