@@ -41,32 +41,23 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
             ? product.title.trim().toUpperCase()
             : "ללא שם";
         const id = product._id || product.id || "ללא מזהה";
-        const locations: string[] = (product.location || []).filter(
-          (loc: unknown): loc is string => typeof loc === "string"
-        );
 
         if (yOffset > 220) {
           doc.addPage();
           yOffset = 30;
         }
 
-        // Title
+        // Product Title
         doc.setFontSize(14);
         doc.text(name, 105, yOffset, { align: "center" });
         yOffset += 10;
 
-        // QR(s) for each location
-        for (const loc of locations) {
-          const qr = await QRCode.toDataURL(loc.toUpperCase());
-          doc.addImage(qr, "PNG", 80, yOffset, 50, 50);
-          yOffset += 55;
+        // QR code of product ID
+        const qr = await QRCode.toDataURL(id.toString());
+        doc.addImage(qr, "PNG", 80, yOffset, 50, 50);
+        yOffset += 55;
 
-          doc.setFontSize(10);
-          doc.text(loc.toUpperCase(), 105, yOffset, { align: "center" });
-          yOffset += 10;
-        }
-
-        // ID
+        // Show ID under QR
         doc.setFontSize(10);
         doc.text(`ID: ${id}`, 105, yOffset, { align: "center" });
         yOffset += 20;
@@ -77,7 +68,7 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
       setPdfUrl(blobUrl);
       doc.save(`${filename}.pdf`);
     } catch (err) {
-      console.error("Failed to generate product QR PDF:", err);
+      console.error("Failed to generate product PDF:", err);
       alert("שגיאה ביצירת הדו\"ח");
     } finally {
       setLoading(false);
