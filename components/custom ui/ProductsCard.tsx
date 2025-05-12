@@ -15,65 +15,71 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
   const [productCount, setProductCount] = useState<number>(0);
 
   const generatePDF = async () => {
-    setLoading(true);
-    const doc = new jsPDF();
-    doc.setFont("Alef-Regular");
-    let yOffset = 30;
+  setLoading(true);
+  const doc = new jsPDF();
+  doc.setFont("Alef-Regular");
 
-    doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text(title.split("").reverse().join(""), 200, yOffset, {
-      align: "right",
-      maxWidth: 180,
-    });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const qrSize = 30;
+  const productsPerPage = 10;
+  let productIndex = 0;
 
-    yOffset += 15;
+  doc.setFontSize(16);
+  doc.setTextColor(40, 40, 40);
+  doc.text(title.split("").reverse().join(""), pageWidth - 10, 20, {
+    align: "right",
+    maxWidth: 180,
+  });
 
-    try {
-      const res = await fetch("/api/products");
-      const products = await res.json();
+  try {
+    const res = await fetch("/api/products");
+    const products = await res.json();
 
-      setProductCount(products.length);
+    setProductCount(products.length);
 
-      for (const product of products) {
-        const name =
-          typeof product.title === "string"
-            ? product.title.trim().toUpperCase()
-            : "ללא שם";
-        const id = product._id || product.id || "ללא מזהה";
+    for (const product of products) {
+      const name =
+        typeof product.title === "string"
+          ? product.title.trim().toUpperCase()
+          : "ללא שם";
+      const id = product._id || product.id || "ללא מזהה";
 
-        if (yOffset > 220) {
-          doc.addPage();
-          yOffset = 30;
-        }
-
-        // Product Title
-        doc.setFontSize(14);
-        doc.text(name, 105, yOffset, { align: "center" });
-        yOffset += 10;
-
-        // QR code of product ID
-        const qr = await QRCode.toDataURL(id.toString());
-        doc.addImage(qr, "PNG", 80, yOffset, 50, 50);
-        yOffset += 55;
-
-        // Show ID under QR
-        doc.setFontSize(10);
-        doc.text(`ID: ${id}`, 105, yOffset, { align: "center" });
-        yOffset += 20;
+      if (productIndex > 0 && productIndex % productsPerPage === 0) {
+        doc.addPage();
       }
 
-      const blob = doc.output("blob");
-      const blobUrl = URL.createObjectURL(blob);
-      setPdfUrl(blobUrl);
-      doc.save(`${filename}.pdf`);
-    } catch (err) {
-      console.error("Failed to generate product PDF:", err);
-      alert("שגיאה ביצירת הדו\"ח");
-    } finally {
-      setLoading(false);
+      const itemOffset = 30 + (productIndex % productsPerPage) * 25;
+
+      // Product Title
+      doc.setFontSize(10);
+      doc.text(name, pageWidth / 2, itemOffset, { align: "center" });
+
+      // QR Code
+      const qr = await QRCode.toDataURL(id.toString());
+      doc.addImage(qr, "PNG", (pageWidth - qrSize) / 2, itemOffset + 3, qrSize, qrSize);
+
+      // Product ID
+      doc.setFontSize(8);
+      doc.text(`ID: ${id}`, pageWidth / 2, itemOffset + qrSize + 10, {
+        align: "center",
+      });
+
+      productIndex++;
     }
-  };
+
+    const blob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+    setPdfUrl(blobUrl);
+    doc.save(`${filename}.pdf`);
+  } catch (err) {
+    console.error("Failed to generate product PDF:", err);
+    alert("שגיאה ביצירת הדו\"ח");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-md border">
