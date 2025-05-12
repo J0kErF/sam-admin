@@ -21,16 +21,12 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const qrSize = 30;
-  const productsPerPage = 10;
-  let productIndex = 0;
 
-  doc.setFontSize(16);
-  doc.setTextColor(40, 40, 40);
-  doc.text(title.split("").reverse().join(""), pageWidth - 10, 20, {
-    align: "right",
-    maxWidth: 180,
-  });
+  const productsPerPage = 10;
+  const qrSize = 30;
+  const blockHeight = 65;
+  const topMargin = 20;
+  const blockStartY = topMargin + 10;
 
   try {
     const res = await fetch("/api/products");
@@ -38,34 +34,36 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
 
     setProductCount(products.length);
 
-    for (const product of products) {
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
       const name =
         typeof product.title === "string"
-          ? product.title.trim().toUpperCase()
+          ? product.title.reverse()
           : "ללא שם";
       const id = product._id || product.id || "ללא מזהה";
 
-      if (productIndex > 0 && productIndex % productsPerPage === 0) {
+      // Add new page every 10 products
+      if (i > 0 && i % productsPerPage === 0) {
         doc.addPage();
       }
 
-      const itemOffset = 30 + (productIndex % productsPerPage) * 25;
+      const positionOnPage = i % productsPerPage;
+      const y = blockStartY + positionOnPage * blockHeight;
 
-      // Product Title
+      // Title
       doc.setFontSize(10);
-      doc.text(name, pageWidth / 2, itemOffset, { align: "center" });
+      doc.text(name, pageWidth / 2, y, { align: "center" });
 
-      // QR Code
+      // QR Code (for ID)
       const qr = await QRCode.toDataURL(id.toString());
-      doc.addImage(qr, "PNG", (pageWidth - qrSize) / 2, itemOffset + 3, qrSize, qrSize);
+      const qrX = (pageWidth - qrSize) / 2;
+      doc.addImage(qr, "PNG", qrX, y + 5, qrSize, qrSize);
 
-      // Product ID
+      // ID below QR
       doc.setFontSize(8);
-      doc.text(`ID: ${id}`, pageWidth / 2, itemOffset + qrSize + 10, {
+      doc.text(`ID: ${id}`, pageWidth / 2, y + 5 + qrSize + 8, {
         align: "center",
       });
-
-      productIndex++;
     }
 
     const blob = doc.output("blob");
@@ -79,6 +77,7 @@ const ProductsCard = ({ title, filename }: ReportCardProps) => {
     setLoading(false);
   }
 };
+
 
 
   return (
