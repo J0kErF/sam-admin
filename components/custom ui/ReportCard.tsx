@@ -48,7 +48,7 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
             }
           
             const qr = await QRCode.toDataURL(item._id || item.title);
-            const productImage = item.image ? await loadImageAsDataUrl(item.image) : null;
+            const productImage = item.media ? await loadImageAsDataUrl(item.media[0]) : null;
           
             // Card box
             doc.setDrawColor(220);
