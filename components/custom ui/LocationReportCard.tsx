@@ -97,9 +97,6 @@ const LocationReportCard = ({ title, filename }: ReportCardProps) => {
                 )}
             </div>
 
-            <p className="text-gray-500 text-sm mt-3">
-                סהכ מיקומים {uniqueLocationcount}
-            </p>
         </div>
     );
 };

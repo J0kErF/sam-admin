@@ -92,9 +92,7 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
                 )}
             </div>
 
-            <p className="text-gray-500 text-sm mt-3">
-                סה״כ: {data.length} פריטים
-            </p>
+            
         </div>
     );
 };
