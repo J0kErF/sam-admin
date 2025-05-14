@@ -61,11 +61,14 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
             doc.text(`🆔 ${item._id}`, 180, yOffset + 5, { align: "right" });
             doc.text(`📦 ${item.title}`, 180, yOffset + 12, { align: "right" });
             doc.text(`📉 כמות: ${item.quantity}`, 180, yOffset + 19, { align: "right" });
+
+            let locationStartY = yOffset + 26; // start below quantity line
             if (Array.isArray(item.location)) {
                 item.location.forEach((loc: string, index: number) => {
-                    doc.text(`📍 ${loc}`, 180, yOffset + 19 + index * 7, { align: "right" });
+                    doc.text(`📍 ${loc}`, 180, locationStartY + index * 7, { align: "right" });
                 });
             }
+
 
             // QR Code
             doc.addImage(qr, "PNG", 14, yOffset, 24, 24);
