@@ -28,14 +28,14 @@ const LeftSideBar = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-full w-60 bg-gradient-to-b from-blue-50 to-blue-100 shadow-md border-r
-        text-gray-700 flex flex-col justify-between transition-transform duration-300 ease-in-out
-        ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:relative`}
+        className={`fixed top-0 left-0 z-40 w-64 h-screen bg-gradient-to-b from-blue-50 to-blue-100 shadow-md border-r
+  text-gray-700 flex flex-col justify-between transition-transform duration-300 ease-in-out
+  ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:relative`}
       >
-        {/* Sidebar Content */}
-        <div className="flex flex-col h-full overflow-y-auto px-4 py-6 gap-6">
+        {/* Top Section: Logo + Nav */}
+        <div className="flex flex-col h-full overflow-y-auto px-4 py-6">
           {/* Logo */}
-          <div className="flex items-center justify-center mb-2">
+          <div className="flex items-center justify-center mb-6">
             <Link href="/">
               <Image
                 src="/icons/icon-512.png"
@@ -47,18 +47,17 @@ const LeftSideBar = () => {
             </Link>
           </div>
 
-          {/* Nav Links */}
-          <nav className="flex flex-col gap-1 text-sm font-medium">
+          {/* Nav */}
+          <nav className="flex flex-col gap-2 text-sm font-medium">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.url}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-150 ${
-                  pathname === link.url
+                className={`flex items-center gap-2 px-3 py-2 rounded-md transition-all duration-150 ${pathname === link.url
                     ? "bg-blue-600 text-white shadow-sm"
                     : "hover:bg-blue-200 hover:text-blue-900 text-gray-700"
-                }`}
+                  }`}
               >
                 {link.icon}
                 <span className="truncate">{link.label}</span>
@@ -67,12 +66,13 @@ const LeftSideBar = () => {
           </nav>
         </div>
 
-        {/* User Info */}
-        <div className="px-4 py-3 bg-blue-700 text-white flex items-center gap-2 text-sm rounded-t-md">
+        {/* Bottom Section: User */}
+        <div className="px-4 py-4 bg-blue-700 text-white flex items-center gap-2 text-sm">
           <UserButton />
           <span className="truncate">הפרופיל שלי</span>
         </div>
       </aside>
+
     </>
   );
 };
