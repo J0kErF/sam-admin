@@ -14,15 +14,15 @@ interface ReportCardProps {
 const loadImageAsDataUrl = async (url: string): Promise<string> => {
     const response = await fetch(url);
     const blob = await response.blob();
-  
+
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
     });
-  };
-  
+};
+
 const ReportCard = ({ title, data, filename }: ReportCardProps) => {
     const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
@@ -43,36 +43,41 @@ const ReportCard = ({ title, data, filename }: ReportCardProps) => {
 
         for (const item of data) {
             if (yOffset > 260) {
-              doc.addPage();
-              yOffset = 30;
+                doc.addPage();
+                yOffset = 30;
             }
-          
+
             const qr = await QRCode.toDataURL(item._id || item.title);
             const productImage = item.media ? await loadImageAsDataUrl(item.media[0]) : null;
-          
+
             // Card box
             doc.setDrawColor(220);
             doc.setLineWidth(0.2);
             doc.roundedRect(10, yOffset - 5, 190, 40, 2, 2, "S");
-          
+
             // Text content (RTL)
             doc.setFontSize(12);
             doc.setTextColor(20, 20, 20);
             doc.text(`🆔 ${item._id}`, 180, yOffset + 5, { align: "right" });
             doc.text(`📦 ${item.title}`, 180, yOffset + 12, { align: "right" });
             doc.text(`📉 כמות: ${item.quantity}`, 180, yOffset + 19, { align: "right" });
-          
+            if (Array.isArray(item.location)) {
+                item.location.forEach((loc: string, index: number) => {
+                    doc.text(`📍 ${loc}`, 180, yOffset + 19 + index * 7, { align: "right" });
+                });
+            }
+
             // QR Code
             doc.addImage(qr, "PNG", 14, yOffset, 24, 24);
-          
+
             // Product Image (if exists)
             if (productImage) {
-              doc.addImage(productImage, "JPEG", 44, yOffset, 24, 24);
+                doc.addImage(productImage, "JPEG", 44, yOffset, 24, 24);
             }
-          
+
             yOffset += 50;
-          }
-          
+        }
+
         const blob = doc.output("blob");
         const blobUrl = URL.createObjectURL(blob);
         setPdfUrl(blobUrl);
