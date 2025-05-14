@@ -19,7 +19,7 @@ const LeftSideBar = () => {
         </Link>
 
         {/* Nav Links */}
-        <nav className="flex flex-col gap-6">
+        <nav className="flex flex-col gap-3">
           {navLinks.map((link) => (
             <Link
               key={link.label}
