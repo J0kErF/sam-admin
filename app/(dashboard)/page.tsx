@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import SalesChart from "@/components/custom ui/SalesChart";
 import { getSalesPerMonth, getTotalCustomers, getTotalSales } from "@/lib/actions/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CircleDollarSign, ShoppingBag, UserRound } from "lucide-react";
@@ -15,7 +14,6 @@ import { getStockCount } from "@/lib/actions/actions"; // adjust to your logic
 export default async function Dashboard() {
   const { totalRevenue, totalOrders } = await getTotalSales();
   const totalCustomers = await getTotalCustomers();
-  const graphData = await getSalesPerMonth();
   const { used, total } = await getStockCount(); // ✅ add this line
 
 
@@ -58,14 +56,7 @@ export default async function Dashboard() {
         </Card>
       </div>
 
-      <Card className="mt-10">
-        <CardHeader>
-          <CardTitle>הכנסות חודשיים (₪)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <SalesChart data={graphData} />
-        </CardContent>
-      </Card>
+      
 
       <Card className="mt-10">
         <CardHeader className="text-center">
