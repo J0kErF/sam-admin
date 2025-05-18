@@ -2,17 +2,19 @@
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
-const COLORS = ["#3B82F6", "#E5E7EB"]; // Blue and gray
+const COLORS = ["#3B82F6", "#E5E7EB"]; // Blue (used), Gray (remaining)
 
 export default function StockCircleChart({ used, total }: { used: number; total: number }) {
-  const remaining = total - used;
+  const remaining = Math.max(total - used, 0);
+  const percentage = total === 0 ? 0 : Math.round((used / total) * 100);
+
   const data = [
-    { name: "Used", value: used },
-    { name: "Available", value: remaining > 0 ? remaining : 0 },
+    { name: "נבדקו", value: used },
+    { name: "טרם נבדקו", value: remaining },
   ];
 
   return (
-    <div className="w-full h-[260px] flex flex-col items-center justify-center">
+    <div className="relative w-full h-[260px] flex items-center justify-center">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
@@ -21,23 +23,25 @@ export default function StockCircleChart({ used, total }: { used: number; total:
             cy="50%"
             innerRadius={60}
             outerRadius={85}
-            fill="#8884d8"
             paddingAngle={2}
             dataKey="value"
             stroke="none"
           >
             {data.map((_, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index]} />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip
+            formatter={(value: number, name: string) => [`${value}`, name]}
+            labelStyle={{ fontSize: 12 }}
+          />
         </PieChart>
       </ResponsiveContainer>
-      <div className="absolute text-center mt-[-140px]">
-        <p className="text-2xl font-bold text-blue-600">
-          {Math.round((used / total) * 100)}%
-        </p>
-        <p className="text-xs text-gray-500">תפוסה</p>
+
+      {/* Centered Percentage Label */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center rtl:text-right">
+        <p className="text-2xl font-bold text-blue-600">{percentage}%</p>
+        <p className="text-sm text-gray-600">תפוסה</p>
       </div>
     </div>
   );
