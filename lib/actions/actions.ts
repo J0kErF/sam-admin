@@ -1,6 +1,9 @@
 import Customer from "../models/Customer";
 import Order from "../models/Order";
 import { connectToDB } from "../mongoDB"
+import Product from "@/lib/models/Product";
+import StockLog from "@/lib/models/StockLog";
+
 
 
 export const getSearchedProducts = async (query: string) => {
@@ -46,11 +49,29 @@ export const getSalesPerMonth = async () => {
     return acc
   }, {})
 
-  const graphData = Array.from({ length: 12}, (_, i) => {
+  const graphData = Array.from({ length: 12 }, (_, i) => {
     const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(0, i))
     // if i === 5 => month = "Jun"
     return { name: month, sales: salesPerMonth[i] || 0 }
   })
 
   return graphData
+}
+
+export const getStockCount = async () => {
+  await connectToDB()
+  const products = await Product.find();
+  const total = products.length;
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  const logs = await StockLog.find({
+    lastCountedAt: {
+      $gte: startOfMonth,
+      $lte: endOfMonth,
+    },
+  }).lean();
+  const used = logs.length;
+  return { used, total };
 }

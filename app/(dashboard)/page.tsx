@@ -5,12 +5,17 @@ import { getSalesPerMonth, getTotalCustomers, getTotalSales } from "@/lib/action
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CircleDollarSign, ShoppingBag, UserRound } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import SearchBar from "@/components/custom ui/SearchBar"; // Assuming you place it there
+import SearchBar from "@/components/custom ui/SearchBar";
+import StockCircleChart from "@/components/custom ui/StockCircleChart";
+import { getStockCount } from "@/lib/actions/actions"; // adjust to your logic
+
 
 export default async function Dashboard() {
   const { totalRevenue, totalOrders } = await getTotalSales();
   const totalCustomers = await getTotalCustomers();
   const graphData = await getSalesPerMonth();
+  const { used, total } = await getStockCount(); // ✅ add this line
+
 
   return (
     <div className="p-4 md:p-10 max-w-screen-xl mx-auto">
@@ -32,7 +37,7 @@ export default async function Dashboard() {
 
         <Card>
           <CardHeader className="flex items-center justify-between">
-            <CardTitle>כל הקניות</CardTitle>
+            <CardTitle>כל הטיפולים</CardTitle>
             <ShoppingBag />
           </CardHeader>
           <CardContent>
@@ -53,12 +58,27 @@ export default async function Dashboard() {
 
       <Card className="mt-10">
         <CardHeader>
-          <CardTitle>קניות ויזואליות (₪)</CardTitle>
+          <CardTitle>הכנסות חודשיים (₪)</CardTitle>
         </CardHeader>
         <CardContent>
           <SalesChart data={graphData} />
         </CardContent>
       </Card>
+
+      <Card className="mt-10">
+        <CardHeader className="text-center">
+          <CardTitle className="text-lg font-semibold text-blue-900">סטטוס מחסן</CardTitle>
+        </CardHeader>
+
+        <CardContent className="flex justify-center items-center">
+          <div className="w-full max-w-xs">
+            
+            <StockCircleChart used={used} total={total} />
+          </div>
+        </CardContent>
+      </Card>
+
+
     </div>
   );
 }
