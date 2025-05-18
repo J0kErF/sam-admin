@@ -62,7 +62,7 @@ export const getStockCount = async () => {
   await connectToDB()
   const products = await Product.find();
   const total = products.length;
-
+  console.log("total", total);
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
@@ -73,5 +73,6 @@ export const getStockCount = async () => {
     },
   }).lean();
   const used = logs.length;
+  console.log("used", used);
   return { used, total };
 }
