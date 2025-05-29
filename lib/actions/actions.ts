@@ -4,7 +4,7 @@ import { connectToDB } from "../mongoDB"
 import Product from "@/lib/models/Product";
 import StockLog from "@/lib/models/StockLog";
 
-
+export const dynamic = "force-dynamic";
 
 export const getSearchedProducts = async (query: string) => {
   try {

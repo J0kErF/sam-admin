@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongoDB";
 import { Provider } from "@/lib/models/Provider";
-
+export const dynamic = "force-dynamic";
 // GET all providers
 export async function GET() {
   try {

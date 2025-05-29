@@ -24,3 +24,4 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
   await Part.findByIdAndDelete(params.id);
   return NextResponse.json({ message: "Part deleted" });
 }
+export const dynamic = "force-dynamic";
