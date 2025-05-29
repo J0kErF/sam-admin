@@ -217,3 +217,4 @@ export default function PartsListPage() {
         </div>
     );
 }
+export const dynamic = "force-dynamic";

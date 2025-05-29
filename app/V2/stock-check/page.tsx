@@ -177,3 +177,4 @@ export default function StockCheckPage() {
     </div>
   );
 }
+export const dynamic = "force-dynamic";

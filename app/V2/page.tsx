@@ -1,4 +1,3 @@
-export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -75,3 +74,4 @@ export default async function Dashboard() {
     </div>
   );
 }
+export const dynamic = "force-dynamic";
