@@ -63,7 +63,7 @@ const ProductDetails = ({ params }: { params: { productId: string }}) => {
 
   return loading ? <Loader /> : (
     <div className="flex flex-col gap-6">
-      <ProductForm initialData={productDetails} />
+      
       <div className="flex flex-col items-center gap-2 mt-6">
         <p className="text-sm text-gray-500">QR קוד למוצר</p>
         <QRCodeSVG ref={qrRef} value={params.productId} size={150} />
