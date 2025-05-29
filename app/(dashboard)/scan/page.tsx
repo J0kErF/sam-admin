@@ -25,7 +25,7 @@ export default function QrCodeScanPage() {
         if (decodedText.startsWith("http")) {
           window.location.href = decodedText;
         } else {
-          router.push(`/products/${decodedText}`);
+          router.push(`/V2/parts/${decodedText}`);
         }
 
         scanner.clear(); // stop scanning

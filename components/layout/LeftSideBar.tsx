@@ -4,43 +4,48 @@ import { UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import { navLinks } from "@/lib/constants";
 
 const LeftSideBar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 left-0 h-screen min-w-[230px] bg-blue-100 text-white flex flex-col justify-between px-6 py-8 shadow-xl z-30 max-lg:hidden">
-      {/* Logo */}
-      <div className="flex flex-col gap-10">
-        <Link href="/" className="flex items-center justify-center">
-          <Image src="/icons/icon-512.png" alt="logo" width={60} height={60} />
+    <aside className="sticky top-0 left-0 h-screen w-64 bg-white border-r shadow-md flex flex-col justify-between z-30 max-lg:hidden">
+      {/* Logo & Navigation */}
+      <div className="flex flex-col gap-6 p-6">
+        {/* Logo */}
+        <Link href="/" className="flex justify-center mb-4">
+          <Image src="/icons/icon-512.png" alt="logo" width={48} height={48} />
         </Link>
 
         {/* Nav Links */}
-        <nav className="flex flex-col gap-3">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.url}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                pathname === link.url
-                  ? "bg-blue-600 text-white font-semibold"
-                  : "text-gray-700 hover:bg-blue-500 hover:text-white"
-              }`}
-            >
-              {link.icon}
-              <span className="text-sm">{link.label}</span>
-            </Link>
-          ))}
+        <nav className="flex flex-col gap-1">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.url;
+            return (
+              <Link
+                key={link.label}
+                href={link.url}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all ${
+                  isActive
+                    ? "bg-blue-600 text-white font-semibold"
+                    : "text-gray-700 hover:bg-blue-100 hover:text-blue-600"
+                }`}
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
-      {/* User section */}
-      <div className="mt-6 flex items-center gap-3 px-4 py-3 bg-blue-800 rounded-lg">
+      {/* User Section */}
+      <div className="flex items-center gap-3 bg-blue-50 border-t px-6 py-4">
         <UserButton />
-        <span className="text-sm text-white">הפרופיל שלי</span>
+        <div className="flex-1">
+          <p className="text-sm text-gray-800 font-medium">הפרופיל שלי</p>
+        </div>
       </div>
     </aside>
   );

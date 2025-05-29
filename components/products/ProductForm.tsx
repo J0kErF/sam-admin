@@ -1,369 +1,177 @@
+// ✅ Professional Client Form UI: /app/parts/page.tsx
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useRouter } from "next/navigation";
-
-import { Separator } from "../ui/separator";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "../ui/textarea";
-import ImageUpload from "../custom ui/ImageUpload";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import Delete from "../custom ui/Delete";
-import MultiText from "../custom ui/MultiText";
-import MultiSelect from "../custom ui/MultiSelect";
-import Loader from "../custom ui/Loader";
+import ImageUpload from "@/components/custom ui/ImageUpload";
 
-const formSchema = z.object({
-  title: z.string().min(2).max(20),
-  description: z.string().min(2).max(500).trim(),
-  media: z.array(z.string()),
-  category: z.string(),
-  collections: z.array(z.string()),
-  tags: z.array(z.string()),
-  sizes: z.array(z.string()),
-  location: z.array(z.string()), // renamed from colors
-  price: z.coerce.number().min(0.1),
-  quantity: z.coerce.number().int().min(0), // renamed from expense
-});
-
-interface ProductFormProps {
-  initialData?: ProductType | null;
-}
-
-const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
-  const router = useRouter();
-
-  const [loading, setLoading] = useState(true);
-  const [collections, setCollections] = useState<CollectionType[]>([]);
-
-  const getCollections = async () => {
-    try {
-      const res = await fetch("/api/collections");
-      const data = await res.json();
-      setCollections(data);
-      setLoading(false);
-    } catch (err) {
-      console.log("[collections_GET]", err);
-      toast.error("Something went wrong! Please try again.");
-    }
-  };
-
-  useEffect(() => {
-    getCollections();
-  }, []);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialData
-      ? {
-          ...initialData,
-          collections: initialData.collections?.map((collection) =>
-            typeof collection === "string" ? collection : collection._id
-          ) || [],
-          tags: initialData.tags || [],
-          sizes: initialData.sizes || [],
-          location: initialData.location || [],
-          media: initialData.media || [],
-        }
-      : {
-          title: "",
-          description: "",
-          media: [],
-          category: "",
-          collections: [],
-          tags: [],
-          sizes: [],
-          location: [],
-          price: 0.1,
-          quantity: 0,
-        },
+export default function AddPartPage() {
+  const [form, setForm] = useState({
+    name: "",
+    modelYears: "",
+    carCompanies: "",
+    subMake: "",
+    sellPrice: "",
+    category: "",
+    media: [] as string[],
   });
 
-  const handleKeyPress = (
-    e:
-      | React.KeyboardEvent<HTMLInputElement>
-      | React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
-    if (e.key === "Enter") e.preventDefault();
-  };
+  const [locations, setLocations] = useState([{ location: "", quantity: "" }]);
+  const [providers, setProviders] = useState([{ providerName: "", price: "", barcode: "" }]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      setLoading(true);
-      const url = initialData
-        ? `/api/products/${initialData._id}`
-        : "/api/products";
+  const [availableProviders, setAvailableProviders] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
-      const res = await fetch(url, {
-        method: "POST",
-        body: JSON.stringify(values),
+  useEffect(() => {
+    fetch("/api/providers")
+      .then((res) => res.json())
+      .then((data) => {
+        const names = data.providers.map((prov: { companyName: string }) => prov.companyName);
+        setAvailableProviders(names);
       });
 
-      if (res.ok) {
-        setLoading(false);
-        toast.success(`Product ${initialData ? "updated" : "created"}`);
-        window.location.href = "/products";
-        router.push("/products");
-      }
-    } catch (err) {
-      console.log("[products_POST]", err);
-      toast.error("Something went wrong! Please try again.");
-    }
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        const names = data.categories.map((cat: { name: string }) => cat.name);
+        setAvailableCategories(names);
+      });
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  return loading ? (
-    <Loader />
-  ) : (
-    <div className="p-10">
-      {initialData ? (
-        <div className="flex items-center justify-between">
-          <p className="text-heading2-bold">עדכון מוצר</p>
-          <Delete id={initialData._id} item="product" />
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const res = await fetch("/api/parts/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        sellPrice: parseFloat(form.sellPrice),
+        modelYears: form.modelYears.split(",").map(Number),
+        carCompanies: form.carCompanies.split(","),
+        locations: locations.map((l) => ({ location: l.location, quantity: parseInt(l.quantity) })),
+        providers: providers.map((p) => ({ providerName: p.providerName, price: parseFloat(p.price), barcode: p.barcode })),
+      }),
+    });
+
+    const data = await res.json();
+    if (res.ok) alert("Part added successfully!");
+    else alert("Error: " + data.message);
+  };
+
+  const handleLocationChange = (index: number, field: 'location' | 'quantity', value: string) => {
+    const updated = [...locations];
+    updated[index][field] = value;
+    setLocations(updated);
+  };
+
+  const addLocation = () => {
+    setLocations([...locations, { location: "", quantity: "" }]);
+  };
+
+  const handleProviderChange = (index: number, field: 'providerName' | 'price' | 'barcode', value: string) => {
+    const updated = [...providers];
+    updated[index][field] = value;
+    setProviders(updated);
+  };
+
+  const addProvider = () => {
+    setProviders([...providers, { providerName: "", price: "", barcode: "" }]);
+  };
+
+  const handleImageChange = (url: string) => {
+    setForm((prev) => ({ ...prev, media: [...prev.media, url] }));
+  };
+
+  const handleImageRemove = (url: string) => {
+    setForm((prev) => ({ ...prev, media: prev.media.filter((img) => img !== url) }));
+  };
+
+  return (
+    <div className="p-8 max-w-3xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Add New Part</h2>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <input name="name" placeholder="Part Name" onChange={handleChange} className="border p-2 rounded" required />
+        <input name="sellPrice" placeholder="Sell Price" type="number" onChange={handleChange} className="border p-2 rounded" required />
+        <input name="modelYears" placeholder="Model Years (e.g. 2018,2019)" onChange={handleChange} className="border p-2 rounded" />
+        <input name="carCompanies" placeholder="Car Company (e.g. Toyota)" onChange={handleChange} className="border p-2 rounded" />
+        <input name="subMake" placeholder="Sub Make (e.g. Corolla)" onChange={handleChange} className="border p-2 rounded" />
+
+        <select name="category" onChange={handleChange} className="border p-2 rounded" required>
+          <option value="">Select Category</option>
+          {availableCategories.map((cat, idx) => (
+            <option key={idx} value={cat}>{cat}</option>
+          ))}
+        </select>
+
+        <div>
+          <h3 className="font-semibold">Images</h3>
+          <ImageUpload
+            value={form.media}
+            onChange={handleImageChange}
+            onRemove={handleImageRemove}
+          />
         </div>
-      ) : (
-        <p className="text-heading2-bold">יצירת מוצר</p>
-      )}
-      <Separator className="bg-grey-1 mt-4 mb-7" />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>כותרת</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Title"
-                    {...field}
-                    onKeyDown={handleKeyPress}
-                  />
-                </FormControl>
-                <FormMessage className="text-red-1" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>תיאור</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Description"
-                    {...field}
-                    rows={5}
-                    onKeyDown={handleKeyPress}
-                  />
-                </FormControl>
-                <FormMessage className="text-red-1" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="media"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>תמונה</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value}
-                    onChange={(url) => field.onChange([...field.value, url])}
-                    onRemove={(url) =>
-                      field.onChange(
-                        field.value.filter((image) => image !== url)
-                      )
-                    }
-                  />
-                </FormControl>
-                <FormMessage className="text-red-1" />
-              </FormItem>
-            )}
-          />
 
-          <div className="md:grid md:grid-cols-3 gap-8">
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>מחיר (₪)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Price"
-                      {...field}
-                      onKeyDown={handleKeyPress}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-1" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>כמות</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Quantity"
-                      {...field}
-                      onKeyDown={handleKeyPress}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-1" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>קטגוריה</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Category"
-                      {...field}
-                      onKeyDown={handleKeyPress}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-1" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="tags"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>טאג</FormLabel>
-                  <FormControl>
-                    <MultiText
-                      placeholder="Tags"
-                      value={field.value}
-                      onChange={(tag) => field.onChange([...field.value, tag])}
-                      onRemove={(tagToRemove) =>
-                        field.onChange(
-                          field.value.filter((tag) => tag !== tagToRemove)
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-1" />
-                </FormItem>
-              )}
-            />
-            {collections.length > 0 && (
-              <FormField
-                control={form.control}
-                name="collections"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>קולקציות</FormLabel>
-                    <FormControl>
-                      <MultiSelect
-                        placeholder="Collections"
-                        collections={collections}
-                        value={field.value}
-                        onChange={(_id) =>
-                          field.onChange([...field.value, _id])
-                        }
-                        onRemove={(idToRemove) =>
-                          field.onChange(
-                            field.value.filter((id) => id !== idToRemove)
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage className="text-red-1" />
-                  </FormItem>
-                )}
+        <div>
+          <h3 className="font-semibold">Locations</h3>
+          {locations.map((loc, idx) => (
+            <div key={idx} className="flex gap-2 mb-2">
+              <input
+                placeholder="Location"
+                value={loc.location}
+                onChange={(e) => handleLocationChange(idx, "location", e.target.value)}
+                className="border p-2 flex-1 rounded"
               />
-            )}
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>מיקומים</FormLabel>
-                  <FormControl>
-                    <MultiText
-                      placeholder="Locations"
-                      value={field.value}
-                      onChange={(location) =>
-                        field.onChange([...field.value, location])
-                      }
-                      onRemove={(locationToRemove) =>
-                        field.onChange(
-                          field.value.filter((loc) => loc !== locationToRemove)
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-1" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="sizes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>גדלים</FormLabel>
-                  <FormControl>
-                    <MultiText
-                      placeholder="Sizes"
-                      value={field.value}
-                      onChange={(size) =>
-                        field.onChange([...field.value, size])
-                      }
-                      onRemove={(sizeToRemove) =>
-                        field.onChange(
-                          field.value.filter((size) => size !== sizeToRemove)
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage className="text-red-1" />
-                </FormItem>
-              )}
-            />
-          </div>
+              <input
+                type="number"
+                placeholder="Quantity"
+                value={loc.quantity}
+                onChange={(e) => handleLocationChange(idx, "quantity", e.target.value)}
+                className="border p-2 w-24 rounded"
+              />
+            </div>
+          ))}
+          <button type="button" onClick={addLocation} className="text-blue-600 underline">+ Add Location</button>
+        </div>
 
-          <div className="flex gap-10">
-            <Button type="submit" className="bg-blue-1 text-white">
-              שמירה
-            </Button>
-            <Button
-              type="button"
-              onClick={() => router.push("/products")}
-              className="bg-blue-1 text-white"
-            >
-              ביטול
-            </Button>
-          </div>
-        </form>
-      </Form>
+        <div>
+          <h3 className="font-semibold">Providers</h3>
+          {providers.map((prov, idx) => (
+            <div key={idx} className="flex gap-2 mb-2">
+              <select
+                value={prov.providerName}
+                onChange={(e) => handleProviderChange(idx, "providerName", e.target.value)}
+                className="border p-2 flex-1 rounded"
+              >
+                <option value="">Select Provider</option>
+                {availableProviders.map((name, index) => (
+                  <option key={index} value={name}>{name}</option>
+                ))}
+              </select>
+              <input
+                placeholder="Price"
+                type="number"
+                value={prov.price}
+                onChange={(e) => handleProviderChange(idx, "price", e.target.value)}
+                className="border p-2 w-24 rounded"
+              />
+              <input
+                placeholder="Barcode"
+                value={prov.barcode}
+                onChange={(e) => handleProviderChange(idx, "barcode", e.target.value)}
+                className="border p-2 w-40 rounded"
+              />
+            </div>
+          ))}
+          <button type="button" onClick={addProvider} className="text-blue-600 underline">+ Add Provider</button>
+        </div>
+
+        <button type="submit" className="bg-blue-600 text-white p-3 rounded hover:bg-blue-700">Add Part</button>
+      </form>
     </div>
   );
-};
-
-export default ProductForm;
+}

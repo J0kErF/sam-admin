@@ -1,5 +1,3 @@
-
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
@@ -8,8 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import LeftSideBar from "@/components/layout/LeftSideBar";
 import TopBar from "@/components/layout/TopBar";
 import { ToasterProvider } from "@/lib/ToasterProvider";
+
 const inter = Inter({ subsets: ["latin"] });
-import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "סמיח מזגנים - מערכת ניהול",
@@ -19,15 +17,10 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  //if the page not found redirect to page 404
-  if (!children) {
-    notFound();
-  }
   return (
     <ClerkProvider>
       <html lang="en">
@@ -35,10 +28,8 @@ export default function RootLayout({
           <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#1e40af" />
           <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-          
         </head>
         <body className={`${inter.className} bg-white`}>
-          
           <ToasterProvider />
           <div className="flex min-h-screen">
             <LeftSideBar />

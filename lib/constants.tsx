@@ -2,11 +2,16 @@ import {
   CameraIcon,
   CarIcon,
   ClipboardSignature,
+  CreditCard,
+  Folder,
   LayoutDashboard,
+  ListOrdered,
   NotebookIcon,
   Shapes,
   ShoppingBag,
+  ShoppingBasket,
   Tag,
+  Truck,
   UsersRound,
 } from "lucide-react";
 
@@ -17,14 +22,19 @@ export const navLinks = [
     label: "איתור רכב",
   },
   {
-    url: "/collections",
-    icon: <Shapes />,
-    label: "קולקציות",
+    url: "/V2/category",
+    icon: <Folder />,
+    label: "קטגוריות",
   },
   {
-    url: "/products",
-    icon: <Tag />,
-    label: "מוצרים",
+    url: "/V2/providers",
+    icon: <Truck />,
+    label: "ספקים",
+  },
+  {
+    url: "/V2/parts",
+    icon: <ListOrdered />,
+    label: "חלקים",
   },
   {
     url: "/scan",
@@ -32,17 +42,17 @@ export const navLinks = [
     label: "סורק",
   },
   {
-    url: "/orders",
+    url: "/V2/cart",
+    icon: <ShoppingBasket />,
+    label: "עגלת קניות",
+  },
+    {
+    url: "/V2/orders",
     icon: <ShoppingBag />,
-    label: "טיפולים",
+    label: "הזמנות",
   },
   {
-    url: "/customers",
-    icon: <UsersRound />,
-    label: "משתמשים",
-  },
-  {
-    url: "/stock-count",
+    url: "/V2/stock-check",
     icon: <ClipboardSignature />,
     label: "ספירת מלאי",
   },

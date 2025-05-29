@@ -1,5 +1,5 @@
-import Product from "@/lib/models/Product";
 import { connectToDB } from "@/lib/mongoDB";
+import { Part } from "@/lib/models/Part";
 import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 
@@ -11,30 +11,26 @@ export const GET = async (
     await connectToDB();
     const query = decodeURIComponent(params.query);
 
-    // تحقق إذا الـ query هو ObjectId صالح
     const isValidObjectId = mongoose.Types.ObjectId.isValid(query);
 
     const conditions: any[] = [
-      { title: { $regex: query, $options: "i" } },
+      { name: { $regex: query, $options: "i" } },
       { category: { $regex: query, $options: "i" } },
-      { description: { $regex: query, $options: "i" } },
-      { location: { $regex: query, $options: "i" } },
+      { subMake: { $regex: query, $options: "i" } },
+      { carCompanies: { $regex: query, $options: "i" } },
+      { "providers.barcode": { $regex: query, $options: "i" } },
+      { "providers.providerName": { $regex: query, $options: "i" } },
     ];
 
-    // فقط أضف البحث بـ ObjectId إذا كانت query صالحة
     if (isValidObjectId) {
       conditions.push({ _id: new mongoose.Types.ObjectId(query) });
-      conditions.push({ collections: new mongoose.Types.ObjectId(query) });
-      conditions.push({ tags: new mongoose.Types.ObjectId(query) });
     }
 
-    const searchedProducts = await Product.find({
-      $or: conditions,
-    });
+    const parts = await Part.find({ $or: conditions });
 
-    return NextResponse.json(searchedProducts, { status: 200 });
+    return NextResponse.json(parts, { status: 200 });
   } catch (err) {
-    console.log("[search_GET]", err);
+    console.error("[parts_search_GET]", err);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 };
