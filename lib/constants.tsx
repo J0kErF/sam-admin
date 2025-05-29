@@ -56,9 +56,9 @@ export const navLinks = [
     icon: <ClipboardSignature />,
     label: "ספירת מלאי",
   },
-  {
+  /*{
     url: "/reports",
     icon: <NotebookIcon />,
     label: "דוחות",
-  },
+  },*/
 ];
