@@ -2,15 +2,28 @@ import { connectToDB } from "@/lib/mongoDB";
 import { Part } from "@/lib/models/Part";
 import { NextRequest, NextResponse } from "next/server";
 
-// GET single part
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  await connectToDB();
-  const part = await Part.findById(params.id);
-  if (!part) return NextResponse.json({ message: "Part not found" }, { status: 404 });
-  return NextResponse.json(part);
+import { PartLog } from "@/lib/models/PartLog";
+
+export const dynamic = "force-dynamic";
+
+// ✅ GET single part by ID
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const id = params.id;
+    await connectToDB();
+
+    const part = await Part.findById(id);
+    if (!part) {
+      return NextResponse.json({ message: "Part not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(part);
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
 }
 
-// PUT update part
+
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   await connectToDB();
   const data = await req.json();
@@ -18,10 +31,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   return NextResponse.json(updated);
 }
 
-// DELETE part
+// ✅ DELETE part by ID
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  await connectToDB();
-  await Part.findByIdAndDelete(params.id);
-  return NextResponse.json({ message: "Part deleted" });
+  try {
+    await connectToDB();
+    const deleted = await Part.findByIdAndDelete(params.id);
+    if (!deleted) {
+      return NextResponse.json({ message: "Part not found" }, { status: 404 });
+    }
+    return NextResponse.json({ message: "Part deleted" });
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
 }
-export const dynamic = "force-dynamic";

@@ -4,6 +4,7 @@ import {
   ClipboardSignature,
   CreditCard,
   Folder,
+  Home,
   LayoutDashboard,
   ListOrdered,
   NotebookIcon,
@@ -16,6 +17,11 @@ import {
 } from "lucide-react";
 
 export const navLinks = [
+  {
+    url: "/",
+    icon: <Home />,
+    label: "עמוד ראשי",
+  },
   {
     url: "/car-search",
     icon: <CarIcon />,

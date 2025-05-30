@@ -23,6 +23,7 @@ export default function PartsListPage() {
         category: string;
         media: string[];
         providers: Provider[];
+        companyBarcode?: string;
     };
 
     const [parts, setParts] = useState<Part[]>([]);
@@ -61,7 +62,8 @@ export default function PartsListPage() {
                 part.name.toLowerCase().includes(filters.query.toLowerCase()) ||
                 part.subMake.toLowerCase().includes(filters.query.toLowerCase()) ||
                 part.carCompanies.some((c) => c.toLowerCase().includes(filters.query.toLowerCase())) ||
-                part.providers.some((p) => p.barcode.toLowerCase().includes(filters.query.toLowerCase()));
+                part.providers.some((p) => p.barcode.toLowerCase().includes(filters.query.toLowerCase())) ||
+                (part.companyBarcode?.toLowerCase().includes(filters.query.toLowerCase()));
 
             return (
                 matchesQuery &&
@@ -89,7 +91,7 @@ export default function PartsListPage() {
     };
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
+        <div className="p-6 max-w-7xl mx-auto" dir="rtl">
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-3xl font-bold">ניהול חלקים</h1>
                 <button
@@ -100,15 +102,13 @@ export default function PartsListPage() {
                 </button>
             </div>
 
-
-
             <div className="mb-6">
                 <input
                     type="text"
-                    placeholder="חפש לפי מזהה, שם, תת-מותג, חברה או ברקוד..."
+                    placeholder="חפש לפי מזהה, שם, תת-מותג, חברה, ברקוד או ברקוד יצרן..."
                     value={filters.query}
                     onChange={(e) => setFilters({ ...filters, query: e.target.value })}
-                    className="border p-3 rounded w-full text-sm"
+                    className="border p-3 rounded w-full text-sm text-right"
                 />
             </div>
 
@@ -133,21 +133,21 @@ export default function PartsListPage() {
                     placeholder="מודל"
                     value={filters.model}
                     onChange={(e) => setFilters({ ...filters, model: e.target.value })}
-                    className="border p-2 rounded"
+                    className="border p-2 rounded text-right"
                 />
 
                 <input
                     placeholder="תת-מותג"
                     value={filters.subMake}
                     onChange={(e) => setFilters({ ...filters, subMake: e.target.value })}
-                    className="border p-2 rounded"
+                    className="border p-2 rounded text-right"
                 />
 
                 <input
                     placeholder="שנה"
                     value={filters.year}
                     onChange={(e) => setFilters({ ...filters, year: e.target.value })}
-                    className="border p-2 rounded"
+                    className="border p-2 rounded text-right"
                 />
 
                 <div className="col-span-full">
@@ -169,7 +169,7 @@ export default function PartsListPage() {
                 <select
                     value={filters.sortBy}
                     onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
-                    className="border p-2 rounded"
+                    className="border p-2 rounded text-right"
                 >
                     <option value="">מיין לפי</option>
                     <option value="price-asc">מחיר: נמוך לגבוה</option>
@@ -201,15 +201,16 @@ export default function PartsListPage() {
                                         className="rounded object-cover mx-auto"
                                     />
                                 ) : (
-                                    <div className="w-[160px] h-[160px] flex items-center justify-center bg-gray-200 rounded">
-                                        -
+                                    <div className="w-[160px] h-[160px] flex items-center justify-center bg-gray-200 rounded text-gray-500">
+                                        אין תמונה
                                     </div>
                                 )}
                             </div>
                             <h2 className="text-lg font-semibold text-gray-800 mb-1">{part.name}</h2>
-                            <p className="text-sm text-gray-500 mb-2">₪{part.sellPrice.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500 mb-1">₪{part.sellPrice.toFixed(2)}</p>
                             <p className="text-sm text-gray-700 mb-1"><strong>כמות:</strong> {quantity}</p>
                             <p className="text-sm text-gray-700 mb-1"><strong>ספקים:</strong> {providerNames}</p>
+                            <p className="text-xs text-gray-500 mt-1"><strong>ברקוד יצרן:</strong> {part.companyBarcode || "-"}</p>
                         </div>
                     );
                 })}
@@ -217,4 +218,5 @@ export default function PartsListPage() {
         </div>
     );
 }
+
 export const dynamic = "force-dynamic";

@@ -5,6 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import ImageUpload from "@/components/custom ui/ImageUpload";
 import { QRCodeSVG } from "qrcode.react";
+import { any } from "zod";
+import PartLogsTable from "@/components/custom ui/PartLogsTable";
+
 
 export default function Page() {
 
@@ -16,6 +19,10 @@ export default function Page() {
     const [showCartModal, setShowCartModal] = useState(false);
     const [selectedCartProvider, setSelectedCartProvider] = useState("");
     const [cartQuantity, setCartQuantity] = useState(1);
+    const [logs, setLogs] = useState<any[]>([]);
+    const [logsRefreshKey, setLogsRefreshKey] = useState(0); // 🔄 key to trigger re-fetch
+
+
 
 
     const [form, setForm] = useState<{
@@ -27,6 +34,7 @@ export default function Page() {
         sellPrice: number;
         category: string;
         media: string[];
+        companyBarcode: string;
         providers: {
             providerName: string;
             price: number | string;
@@ -43,12 +51,19 @@ export default function Page() {
         sellPrice: 0,
         category: "",
         media: [],
+        companyBarcode: "",
         providers: []
     });
 
     const [availableProviders, setAvailableProviders] = useState<string[]>([]);
     const [availableCategories, setAvailableCategories] = useState<string[]>([]);
     const qrRef = useRef<SVGSVGElement | null>(null);
+    useEffect(() => {
+        fetch(`/api/logs/${id}`)
+            .then(res => res.json())
+            .then(data => setLogs(data))
+            .catch(err => console.error(err));
+    }, [id]);
 
     useEffect(() => {
         fetch(`/api/part/${id}`)
@@ -57,10 +72,12 @@ export default function Page() {
                 setForm({
                     ...data,
                     modelYearFrom: Math.min(...data.modelYears),
-                    modelYearTo: Math.max(...data.modelYears)
+                    modelYearTo: Math.max(...data.modelYears),
+                    companyBarcode: data.companyBarcode || "", // ✅ ensure safe fallback
                 });
                 setLoading(false);
             });
+
 
         fetch("/api/providers")
             .then((res) => res.json())
@@ -75,7 +92,12 @@ export default function Page() {
                 const names = data.categories.map((cat: { name: string }) => cat.name);
                 setAvailableCategories(names);
             });
-    }, [id]);
+
+        fetch(`/api/logs/${id}`)
+            .then(res => res.json())
+            .then(data => setLogs(Array.isArray(data) ? data : []));
+
+    }, [id, logsRefreshKey]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -114,51 +136,170 @@ export default function Page() {
     const handleUpdate = () => {
         setShowReasonModal(true);
     };
-
     const confirmUpdate = async (reason: string) => {
-        const modelYears = [];
-        for (let y = parseInt(form.modelYearFrom as any); y <= parseInt(form.modelYearTo as any); y++) {
-            modelYears.push(y);
+        // 1. Prepare model years
+        const modelYears: number[] = [];
+        const yearFrom = parseInt(form.modelYearFrom as any);
+        const yearTo = parseInt(form.modelYearTo as any);
+        for (let y = yearFrom; y <= yearTo; y++) modelYears.push(y);
+
+        // 2. Fetch existing part
+        const existingRes = await fetch(`/api/part/${id}`);
+        const existing = await existingRes.json();
+
+        // 3. Prepare new data
+        const newData = {
+            ...form,
+            companyBarcode: form.companyBarcode,
+            updateReason: reason,
+            modelYears,
+            sellPrice: parseFloat(String(form.sellPrice)),
+            carCompanies: form.carCompanies.map(String),
+            providers: form.providers.map((p) => ({
+                ...p,
+                price: parseFloat(String(p.price)),
+                quantity: parseInt(String(p.quantity)),
+            })),
+        };
+
+        // 4. Compare general fields
+        const updates: any[] = [];
+        const fieldsToCheck = [
+            "name", "sellPrice", "subMake", "category", "companyBarcode", "modelYears", "carCompanies"
+        ] as const;
+        const fieldTranslations: Record<string, string> = {
+            name: "שם החלק",
+            sellPrice: "מחיר מכירה",
+            subMake: "תת-דגם",
+            category: "קטגוריה",
+            companyBarcode: "ברקוד יצרן",
+            modelYears: "שנות דגם",
+            carCompanies: "חברות רכב",
+            quantity: "כמות",
+            price: "מחיר ספק",
+            barcode: "ברקוד ספק",
+            location: "מיקום ספק",
+            כללי: "כללי",
+        };
+        type FieldToCheck = typeof fieldsToCheck[number];
+
+        for (const field of fieldsToCheck) {
+            const oldVal = existing[field as FieldToCheck];
+            const newVal = newData[field as FieldToCheck];
+
+            const isDifferent = Array.isArray(oldVal) && Array.isArray(newVal)
+                ? JSON.stringify([...oldVal].sort()) !== JSON.stringify([...newVal].sort())
+                : oldVal !== newVal;
+
+            if (isDifferent) {
+
+                updates.push({ field: fieldTranslations[field], oldValue: oldVal, newValue: newVal });
+            }
         }
 
-        const totalQuantity = form.providers.reduce(
-            (sum, p) => sum + parseInt(String(p.quantity || 0)),
-            0
-        );
+        // 5. Compare providers (track only price and quantity)
+        const normalize = (s: string) => s?.trim().toLowerCase();
+        const oldProviders = existing.providers || [];
+        const newProviders = newData.providers || [];
 
+        for (const newProv of newProviders) {
+            const oldProv = oldProviders.find(
+                (op: any) => normalize(op.providerName) === normalize(newProv.providerName)
+            );
+
+            if (!oldProv) {
+                if (newProv.price || newProv.quantity) {
+                    updates.push({
+                        field: `ספק: ${newProv.providerName} הוסף`,
+                        oldValue: null,
+                        newValue: {
+                            price: newProv.price,
+                            quantity: newProv.quantity
+                        }
+                    });
+                }
+            } else {
+                if (oldProv.price !== newProv.price) {
+                    updates.push({
+                        field: `ספק: ${newProv.providerName} מחיר`,
+                        oldValue: oldProv.price,
+                        newValue: newProv.price
+                    });
+                }
+
+                if (oldProv.quantity !== newProv.quantity) {
+                    updates.push({
+                        field: `ספק: ${newProv.providerName} כמות`,
+                        oldValue: oldProv.quantity,
+                        newValue: newProv.quantity
+                    });
+                }
+                if (oldProv.barcode !== newProv.barcode) {
+                    updates.push({
+                        field: `ספק: ${newProv.providerName} ברקוד`,
+                        oldValue: oldProv.barcode,
+                        newValue: newProv.barcode
+                    });
+                }
+                if (oldProv.location !== newProv.location) {
+                    updates.push({
+                        field: `ספק: ${newProv.providerName} מיקום`,
+                        oldValue: oldProv.location,
+                        newValue: newProv.location
+                    });
+                }
+            }
+        }
+
+        // 6. Detect removed providers
+        for (const oldProv of oldProviders) {
+            const stillExists = newProviders.find(
+                np => normalize(np.providerName) === normalize(oldProv.providerName)
+            );
+            if (!stillExists) {
+                updates.push({
+                    field: `ספק: ${oldProv.providerName} הוסר`,
+                    oldValue: {
+                        price: oldProv.price,
+                        quantity: oldProv.quantity
+                    },
+                    newValue: null
+                });
+            }
+        }
+
+        // 7. Update the part
         const updateRes = await fetch(`/api/part/${id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...form,
-                updateReason: reason,
-                modelYears,
-                sellPrice: parseFloat(String(form.sellPrice)),
-                carCompanies: form.carCompanies.map(String),
-                providers: form.providers.map((p) => ({
-                    ...p,
-                    price: parseFloat(String(p.price)),
-                    quantity: parseInt(String(p.quantity)),
-                })),
-            }),
+            body: JSON.stringify(newData),
         });
 
+        // 8. Log the change
         if (updateRes.ok) {
-            await fetch("/api/logs", {
+            await fetch(`/api/logs/${id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    partId: id,
                     reason,
-                    quantity: totalQuantity,
+                    updates: updates.length > 0
+                        ? updates
+                        : [{
+                            field: "כללי",
+                            oldValue: "-",
+                            newValue: "-",
+                        }],
                 }),
             });
 
+            setLogsRefreshKey((prev) => prev + 1);
             alert("✅ חלק עודכן בהצלחה.");
         } else {
             alert("❌ שגיאה בעדכון החלק.");
         }
     };
+
+
 
 
 
@@ -267,8 +408,19 @@ export default function Page() {
 
             {showReasonModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+                    <div className="relative bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowReasonModal(false)}
+                            className="absolute top-3 left-3 text-gray-500 hover:text-red-500 text-lg font-bold"
+                            aria-label="Close"
+                        >
+                            ✖
+                        </button>
+
                         <h3 className="text-lg font-semibold mb-4 text-center">בחר סיבת עדכון</h3>
+
                         <ul className="space-y-2">
                             {["תיקון כללי", "יחידות בשימוש/נמכרות", "יחידות שהתקבלו", "בעיה באיכות", "ספירת מלאי"].map((r, i) => (
                                 <li
@@ -278,7 +430,6 @@ export default function Page() {
                                         setShowReasonModal(false);
                                         setTimeout(() => confirmUpdate(r), 100); // pass the reason directly
                                     }}
-
                                     className="border border-gray-300 p-2 rounded cursor-pointer hover:bg-gray-100 text-center"
                                 >
                                     {r}
@@ -289,11 +440,35 @@ export default function Page() {
                 </div>
             )}
 
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-white shadow rounded-xl p-4 sm:p-6">
-                    <div className="space-y-3">
-                        <input name="name" value={form.name} placeholder="שם חלק" onChange={handleChange} className="border p-3 rounded w-full" />
-                        <input name="sellPrice" value={form.sellPrice} placeholder="מחיר מכירה" type="number" onChange={handleChange} className="border p-3 rounded w-full" />
+                {/* Left form */}
+                <div className="bg-white shadow rounded-xl p-4 sm:p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">שם חלק</label>
+                        <input
+                            name="name"
+                            value={form.name}
+                            placeholder="שם חלק"
+                            onChange={handleChange}
+                            className="border p-3 rounded w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">מחיר מכירה</label>
+                        <input
+                            name="sellPrice"
+                            value={form.sellPrice}
+                            placeholder="מחיר מכירה"
+                            type="number"
+                            onChange={handleChange}
+                            className="border p-3 rounded w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">שנות דגם</label>
                         <div className="flex gap-3">
                             <input
                                 type="number"
@@ -312,25 +487,79 @@ export default function Page() {
                                 className="border p-3 rounded w-full"
                             />
                         </div>
-                        <input name="carCompanies" value={form.carCompanies.join(",")} placeholder="חברות רכב" onChange={(e) => setForm({ ...form, carCompanies: e.target.value.split(",").map((x) => x.trim()) })} className="border p-3 rounded w-full" />
-                        <input name="subMake" value={form.subMake} placeholder="תת-מותג" onChange={handleChange} className="border p-3 rounded w-full" />
-                        <select name="category" value={form.category} onChange={handleChange} className="border p-3 rounded w-full">
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">חברות רכב</label>
+                        <input
+                            name="carCompanies"
+                            value={form.carCompanies.join(",")}
+                            placeholder="חברות רכב"
+                            onChange={(e) =>
+                                setForm({ ...form, carCompanies: e.target.value.split(",").map((x) => x.trim()) })
+                            }
+                            className="border p-3 rounded w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">תת-מותג</label>
+                        <input
+                            name="subMake"
+                            value={form.subMake}
+                            placeholder="תת-מותג"
+                            onChange={handleChange}
+                            className="border p-3 rounded w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">ברקוד יצרן</label>
+                        <input
+                            name="companyBarcode"
+                            value={form.companyBarcode}
+                            placeholder="ברקוד יצרן"
+                            onChange={handleChange}
+                            className="border p-3 rounded w-full"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">קטגוריה</label>
+                        <select
+                            name="category"
+                            value={form.category}
+                            onChange={handleChange}
+                            className="border p-3 rounded w-full"
+                        >
                             <option value="">בחר קטגוריה</option>
                             {availableCategories.map((cat, idx) => (
-                                <option key={idx} value={cat}>{cat}</option>
+                                <option key={idx} value={cat}>
+                                    {cat}
+                                </option>
                             ))}
                         </select>
                     </div>
                 </div>
 
+                {/* Right column: Images */}
                 <div className="bg-white shadow rounded-xl p-4 sm:p-6">
                     <h3 className="font-semibold mb-3 text-gray-700">תמונות</h3>
                     <ImageUpload value={form.media} onChange={handleImageChange} onRemove={handleImageRemove} />
                 </div>
             </div>
 
+
             <div className="bg-white shadow rounded-xl p-4 sm:p-6 mt-6">
                 <h3 className="font-semibold mb-4 text-gray-700">ספקים</h3>
+                {/* Heading row */}
+                <div className="hidden md:grid grid-cols-5 gap-2 mb-2 text-gray-500 text-sm font-semibold px-1">
+                    <span>ספק</span>
+                    <span>מחיר</span>
+                    <span>ברקוד</span>
+                    <span>כמות</span>
+                    <span>מיקום</span>
+                </div>
                 {form.providers.map((prov, idx) => (
                     <div key={idx} className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
                         <select
@@ -359,14 +588,14 @@ export default function Page() {
                         <input
                             placeholder="כמות"
                             type="number"
-                            value={prov.quantity}
+                            value={prov.quantity ?? 0}
                             onChange={(e) => handleProviderChange(idx, "quantity", e.target.value)}
                             className="border p-2 rounded w-full"
                         />
                         <div className="flex gap-2">
                             <input
                                 placeholder="מיקום"
-                                value={prov.location}
+                                value={prov.location ?? ""}
                                 onChange={(e) => handleProviderChange(idx, "location", e.target.value)}
                                 className="border p-2 rounded w-full"
                             />
@@ -418,6 +647,8 @@ export default function Page() {
                     מחק
                 </button>
             </div>
+
+            <PartLogsTable logs={logs} />
 
         </div>
     );

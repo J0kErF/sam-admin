@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// Provider schema now includes quantity and location
 interface ProviderEntry {
   providerName: string;
   price: number;
@@ -18,6 +17,7 @@ export interface IPart extends Document {
   category: string;
   media: string[];
   providers: ProviderEntry[];
+  companyBarcode?: string; // ✅ new field
 }
 
 const ProviderSchema = new Schema<ProviderEntry>(
@@ -40,6 +40,7 @@ const PartSchema = new Schema<IPart>({
   category: { type: String, required: true },
   media: { type: [String], default: [] },
   providers: { type: [ProviderSchema], default: [] },
+  companyBarcode: { type: String, default: "" }, // ✅ new field
 });
 
 export const Part =

@@ -1,32 +1,48 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Pencil, Trash2, X, Plus } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 
 type Provider = {
   _id: string;
   companyName: string;
-  address: string;
-  phoneNumber: string;
-  email: string;
-  contactName: string;
-  notes: string;
+  address?: string;
+  phoneNumber?: string;
+  email?: string;
+  contactName?: string;
+  notes?: string;
+  licenseNumber?: string;
+  bankTransferDetails?: string;
+};
+
+const emptyProvider = {
+  companyName: "",
+  address: "",
+  phoneNumber: "",
+  email: "",
+  contactName: "",
+  notes: "",
+  licenseNumber: "",
+  bankTransferDetails: "",
 };
 
 export default function ProvidersPage() {
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [providerToDelete, setProviderToDelete] = useState<Provider | null>(null);
-
-  const [form, setForm] = useState({
-    companyName: "",
-    address: "",
-    phoneNumber: "",
-    email: "",
-    contactName: "",
-    notes: "",
-  });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [form, setForm] = useState<Omit<Provider, "_id">>(emptyProvider);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProviders();
@@ -38,66 +54,38 @@ export default function ProvidersPage() {
     setProviders(data.providers);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async () => {
+    const method = editingId ? "PUT" : "POST";
+    const endpoint = editingId
+      ? `/api/providers/${editingId}`
+      : "/api/providers";
 
-    const url = editId ? `/api/providers/${editId}` : "/api/providers/add";
-    const method = editId ? "PUT" : "POST";
-
-    const res = await fetch(url, {
+    const res = await fetch(endpoint, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
 
     if (res.ok) {
-      const data = await res.json();
-      if (editId) {
-        setProviders((prev) => prev.map((p) => (p._id === editId ? data.provider : p)));
-      } else {
-        setProviders((prev) => [...prev, data.provider]);
-      }
-      closeModal();
+      toast.success(editingId ? "Provider updated" : "Provider added");
+      setDialogOpen(false);
+      setForm(emptyProvider);
+      setEditingId(null);
+      fetchProviders();
+    } else {
+      toast.error("Failed to save provider");
     }
   };
 
-  const startEdit = (provider: Provider) => {
-    setForm({ ...provider });
-    setEditId(provider._id);
-    setIsModalOpen(true);
-  };
+  const handleDelete = async (id: string) => {
+    if (!confirm("האם אתה בטוח שברצונך למחוק ספק זה?")) return;
 
-  const openAddModal = () => {
-    setForm({
-      companyName: "",
-      address: "",
-      phoneNumber: "",
-      email: "",
-      contactName: "",
-      notes: "",
-    });
-    setEditId(null);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditId(null);
-    setForm({
-      companyName: "",
-      address: "",
-      phoneNumber: "",
-      email: "",
-      contactName: "",
-      notes: "",
-    });
-  };
-
-  const confirmDelete = async (id: string) => {
     const res = await fetch("/api/providers", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -105,130 +93,153 @@ export default function ProvidersPage() {
     });
 
     if (res.ok) {
-      setProviders((prev) => prev.filter((p) => p._id !== id));
+      toast.success("Provider deleted");
+      fetchProviders();
+    } else {
+      toast.error("Failed to delete provider");
     }
-
-    setProviderToDelete(null);
   };
 
+  const openEditDialog = (provider: Provider) => {
+    setForm({ ...provider });
+    setEditingId(provider._id);
+    setDialogOpen(true);
+  };
+
+  const displayValue = (value?: string) => value || "";
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">ניהול ספקים</h1>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
+    <div dir="rtl" className="p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">ספקים</h1>
+        <Button
+          onClick={() => {
+            setForm(emptyProvider);
+            setEditingId(null);
+            setDialogOpen(true);
+          }}
         >
-          <Plus size={16} /> הוסף ספק
-        </button>
+          הוסף ספק
+        </Button>
       </div>
 
-      <div className="overflow-x-auto shadow-md rounded border border-gray-200">
-        <table className="min-w-full text-sm bg-white text-center">
-          <thead className="bg-gray-100 text-gray-700 font-semibold">
-            <tr>
-              <th className="px-4 py-3 border-b">חברה</th>
-              <th className="px-4 py-3 border-b">איש קשר</th>
-              <th className="px-4 py-3 border-b">טלפון</th>
-              <th className="px-4 py-3 border-b">אימייל</th>
-              <th className="px-4 py-3 border-b">הערות</th>
-              <th className="px-4 py-3 border-b">פעולות</th>
-            </tr>
-          </thead>
-          <tbody>
-            {providers.map((p) => (
-              <tr key={p._id} className="hover:bg-gray-50 border-b transition">
-                <td className="px-4 py-2 text-center">{p.companyName}</td>
-                <td className="px-4 py-2 text-center">{p.contactName}</td>
-                <td className="px-4 py-2 text-center">{p.phoneNumber}</td>
-                <td className="px-4 py-2 text-center">{p.email}</td>
-                <td className="px-4 py-2 text-center">{p.notes}</td>
-                <td className="px-4 py-2 flex justify-center gap-2">
-                  <button
-                    onClick={() => startEdit(p)}
-                    className="text-blue-600 hover:text-blue-800"
-                    title="Edit"
-                  >
-                    <Pencil size={18} />
-                  </button>
-                  <button
-                    onClick={() => setProviderToDelete(p)}
-                    className="text-red-600 hover:text-red-800"
-                    title="Delete"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Add/Edit Modal */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={closeModal}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-2xl rounded-lg p-6 shadow-lg relative"
-          >
-            <button
-              onClick={closeModal}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-            >
-              <X size={20} />
-            </button>
-
-            <h2 className="text-xl font-semibold mb-4">
-              {editId ? "עדכון ספק" : "הוסף ספק חדש"}
-            </h2>
-
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="companyName" placeholder="שם החברה" value={form.companyName} onChange={handleChange} className="border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500" required />
-              <input name="address" placeholder="כתובת" value={form.address} onChange={handleChange} className="border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500" />
-              <input name="phoneNumber" placeholder="מספר טלפון" value={form.phoneNumber} onChange={handleChange} className="border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500" />
-              <input name="email" placeholder="אימייל" value={form.email} onChange={handleChange} className="border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500" />
-              <input name="contactName" placeholder="שם איש קשר" value={form.contactName} onChange={handleChange} className="border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500" />
-              <textarea name="notes" placeholder="הערות" value={form.notes} onChange={handleChange} rows={3} className="md:col-span-2 border px-4 py-2 rounded focus:ring-2 focus:ring-blue-500" />
-              <div className="md:col-span-2 flex gap-4 mt-2 justify-end">
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium">שמור</button>
-                <button type="button" onClick={closeModal} className="text-gray-500 hover:underline">ביטול</button>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" >
+        {providers.map((provider) => (
+          <Card key={provider._id} className="rounded-xl shadow-md">
+            <CardContent className="p-5 space-y-3">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">
+                  {displayValue(provider.companyName)}
+                </h2>
+                <Badge variant="outline">
+                  {displayValue(provider.licenseNumber) || "אין מספר חברה"}
+                </Badge>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <Separator />
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>
+                  <strong>איש קשר:</strong>{" "}
+                  {displayValue(provider.contactName)}
+                </p>
+                <p>
+                  <strong>טלפון:</strong> {displayValue(provider.phoneNumber)}
+                </p>
+                <p>
+                  <strong>אימייל:</strong> {displayValue(provider.email)}
+                </p>
+                <p>
+                  <strong>כתובת:</strong> {displayValue(provider.address)}
+                </p>
+                <p>
+                  <strong>פרטי העברה בנקאית:</strong>{" "}
+                  {displayValue(provider.bankTransferDetails)}
+                </p>
+                <p>
+                  <strong>הערות:</strong> {displayValue(provider.notes)}
+                </p>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => openEditDialog(provider)}
+                >
+                  ערוך
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(provider._id)}
+                >
+                  מחק
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-      {/* Delete Confirmation Modal */}
-      {providerToDelete && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={() => setProviderToDelete(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white max-w-md w-full p-6 rounded-md shadow-lg relative"
-          >
-            <button
-              onClick={() => setProviderToDelete(null)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-            >
-              <X size={20} />
-            </button>
-            <h2 className="text-xl font-semibold text-red-600 mb-2">מחק ספק</h2>
-            <p className="text-sm text-gray-700 mb-4">
-              האם אתה בטוח שברצונך למחוק את <span className="font-semibold text-black">{providerToDelete.companyName}</span>?
-            </p>
-            <div className="flex justify-end gap-4">
-              <button onClick={() => setProviderToDelete(null)} className="text-gray-500 hover:underline">ביטול</button>
-              <button onClick={() => confirmDelete(providerToDelete._id)} className="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded">כן, מחק</button>
-            </div>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="bg-white">
+          <DialogHeader>
+            <DialogTitle>
+              {editingId ? "ערוך ספק" : "הוסף ספק"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <Input
+              name="companyName"
+              value={form.companyName}
+              onChange={handleInputChange}
+              placeholder="שם החברה"
+              required
+            />
+            <Input
+              name="contactName"
+              value={form.contactName}
+              onChange={handleInputChange}
+              placeholder="שם איש קשר"
+            />
+            <Input
+              name="phoneNumber"
+              value={form.phoneNumber}
+              onChange={handleInputChange}
+              placeholder="מספר טלפון"
+            />
+            <Input
+              name="email"
+              value={form.email}
+              onChange={handleInputChange}
+              placeholder="אימייל"
+            />
+            <Input
+              name="address"
+              value={form.address}
+              onChange={handleInputChange}
+              placeholder="כתובת"
+            />
+            <Input
+              name="licenseNumber"
+              value={form.licenseNumber}
+              onChange={handleInputChange}
+              placeholder="מספר רישוי"
+            />
+            <Input
+              name="bankTransferDetails"
+              value={form.bankTransferDetails}
+              onChange={handleInputChange}
+              placeholder="פרטי העברה בנקאית"
+            />
+            <Textarea
+              name="notes"
+              value={form.notes}
+              onChange={handleInputChange}
+              placeholder="הערות"
+            />
+            <Button onClick={handleSave}>
+              {editingId ? "עדכן" : "הוסף"} ספק
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

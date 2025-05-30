@@ -12,6 +12,8 @@ export async function POST(req: NextRequest) {
       email = "",
       contactName = "",
       notes = "",
+      licenseNumber = "",
+      bankTransferDetails = "",
     } = body;
 
     if (!companyName) {
@@ -27,11 +29,14 @@ export async function POST(req: NextRequest) {
       email,
       contactName,
       notes,
+      licenseNumber,
+      bankTransferDetails,
     });
 
     return NextResponse.json({ success: true, provider }, { status: 201 });
   } catch (error: any) {
-    console.error("❌ Error creating provider:", error); // 🔍 add this
+    console.error("❌ Error creating provider:", error);
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
+export const dynamic = "force-dynamic"; // Ensures the route is always fresh

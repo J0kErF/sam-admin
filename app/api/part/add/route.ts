@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
       category,
       media = [],
       providers = [],
+      companyBarcode = "", // ✅ extract the new field
     } = body;
 
     if (!name || !sellPrice || !category) {
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
       category,
       media,
       providers: cleanedProviders,
+      companyBarcode, // ✅ add to creation
     });
 
     return NextResponse.json({ success: true, part }, { status: 201 });
