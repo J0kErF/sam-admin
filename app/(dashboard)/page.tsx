@@ -88,65 +88,72 @@ export default function DashboardPage() {
         <StatCard title="ספקים" icon={<Truck />} value={stats.providers} color="text-yellow-600" href="/V2/providers" />
         <StatCard title="קטגוריות" icon={<Folder />} value={stats.categories} color="text-purple-600" href="/V2/categories" />
       </div>
-
-      <div className="bg-white rounded-xl p-4 shadow mt-8">
-        <h2 className="text-lg font-semibold mb-4">📦 חלקים שהתקבלו הכי הרבה</h2>
-
-        {topReceived.length === 0 ? (
-          <p className="text-gray-500 text-center">אין מידע להצגה.</p>
-        ) : (
-          <div className="overflow-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead>
-                <tr className="text-gray-600 border-b">
-                  <th className="p-2">שם החלק</th>
-                  <th className="p-2">מספר עדכונים</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topReceived.map((item, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-b hover:bg-gray-100 cursor-pointer"
-                    onClick={() => router.push(`/V2/parts/${item.partId}`)}
-                  >
-                    <td className="p-2 font-medium text-blue-700 underline">{item.name}</td>
-                    <td className="p-2">{item.count}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-        <div className="bg-white rounded-xl p-4 shadow col-span-full">
-          <h2 className="text-lg font-semibold mb-4">🟥 כמויות קטנות (0–3)</h2>
-          <div className="overflow-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead>
-                <tr className="text-gray-600 border-b">
-                  <th className="p-2">פריט</th>
-                  <th className="p-2">כמות</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lowStock.map((part, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-b hover:bg-gray-100 cursor-pointer"
-                    onClick={() => router.push(`/V2/parts/${part._id}`)}
-                  >
-                    <td className="p-2 font-medium text-blue-700 underline">{part.name}</td>
-                    <td className="p-2">{part.quantity}</td>
+        {/* חלקים שהוזמנו הכי הרבה */}
+        <div className="bg-white rounded-xl p-4 shadow w-full">
+          <h2 className="text-lg font-semibold mb-4">📦 חלקים שהוזמנו הכי הרבה</h2>
+
+          {topReceived.length === 0 ? (
+            <p className="text-gray-500 text-center">אין מידע להצגה.</p>
+          ) : (
+            <div className="overflow-auto">
+              <table className="min-w-full text-sm text-left">
+                <thead>
+                  <tr className="text-gray-600 border-b">
+                    <th className="p-2">שם החלק</th>
+                    <th className="p-2">מספר הכנסות למערכת</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {topReceived.map((item, idx) => (
+                    <tr
+                      key={idx}
+                      className="border-b hover:bg-gray-100 cursor-pointer"
+                      onClick={() => router.push(`/V2/parts/${item.partId}`)}
+                    >
+                      <td className="p-2 font-medium text-blue-700 underline">{item.name}</td>
+                      <td className="p-2">{item.count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* כמויות קטנות */}
+        <div className="bg-white rounded-xl p-4 shadow w-full">
+          <h2 className="text-lg font-semibold mb-4">🟥 כמויות קטנות (0–3)</h2>
+
+          {lowStock.length === 0 ? (
+            <p className="text-gray-500 text-center">אין חלקים עם כמות נמוכה.</p>
+          ) : (
+            <div className="overflow-auto">
+              <table className="min-w-full text-sm text-left">
+                <thead>
+                  <tr className="text-gray-600 border-b">
+                    <th className="p-2">שם החלק</th>
+                    <th className="p-2">כמות</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lowStock.map((part, idx) => (
+                    <tr
+                      key={idx}
+                      className="border-b hover:bg-gray-100 cursor-pointer"
+                      onClick={() => router.push(`/V2/parts/${part._id}`)}
+                    >
+                      <td className="p-2 font-medium text-blue-700 underline">{part.name}</td>
+                      <td className="p-2">{part.quantity}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
+          
     </div>
   );
 }
