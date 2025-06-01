@@ -309,7 +309,7 @@ export default function Page() {
         if (!confirmed) return;
 
         const res = await fetch(`/api/part/${id}`, { method: "DELETE" });
-        if (res.ok) router.push("/parts");
+        if (res.ok) router.push("/V2/parts");
     };
 
     if (loading) return <p className="p-6">טוען...</p>;
