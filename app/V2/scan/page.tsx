@@ -13,23 +13,27 @@ export default function BarcodeScannerPage() {
   const [error, setError] = useState("");
   const [isScanning, setIsScanning] = useState(false);
 
-  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
 
   useEffect(() => {
     const init = async () => {
       try {
-        const availableDevices = await BrowserMultiFormatReader.listVideoInputDevices();
-        setDevices(availableDevices);
-        if (availableDevices.length > 0) {
-          setSelectedDeviceId(availableDevices[0].deviceId);
-        } else {
-          setError("לא נמצאו מצלמות.");
-        }
+        const videoDevices = await BrowserMultiFormatReader.listVideoInputDevices();
+        setDevices(videoDevices);
+
+        // Try to find a device with label including "back" or "rear"
+        const backCamera = videoDevices.find((d) =>
+          d.label.toLowerCase().includes("back") ||
+          d.label.toLowerCase().includes("rear")
+        );
+
+        setSelectedDeviceId(backCamera?.deviceId || videoDevices[0]?.deviceId || "");
       } catch (e: any) {
         setError("שגיאה בגישה למצלמות: " + e.message);
       }
     };
+
     init();
   }, []);
 
@@ -37,11 +41,10 @@ export default function BarcodeScannerPage() {
     if (!selectedDeviceId || !videoRef.current) return;
 
     const codeReader = new BrowserMultiFormatReader(undefined, {
-      delayBetweenScanAttempts: 100, // Fast scan
+      delayBetweenScanAttempts: 150, // faster scanning
     });
-    codeReaderRef.current = codeReader;
 
-    setIsScanning(false);
+    codeReaderRef.current = codeReader;
 
     codeReader
       .decodeFromVideoDevice(
@@ -52,7 +55,6 @@ export default function BarcodeScannerPage() {
             const text = result.getText();
             setIsScanning(true);
             controls.stop();
-            controlsRef.current = controls;
 
             if (text.startsWith("http")) {
               window.location.href = text;
@@ -75,15 +77,19 @@ export default function BarcodeScannerPage() {
   }, [selectedDeviceId, router]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 flex flex-col items-center justify-start">
-      <h1 className="text-2xl font-bold mb-4 text-center">📷 סריקת ברקוד / QR</h1>
+    <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center">
+      <h1 className="text-xl font-bold mb-4 text-center">📷 סריקת ברקוד / QR</h1>
 
       {devices.length > 1 && (
         <div className="mb-4 w-full max-w-sm">
-          <label className="block mb-2 text-lg font-medium">בחר מצלמה:</label>
+          <label className="block mb-2">בחר מצלמה:</label>
           <select
             value={selectedDeviceId}
-            onChange={(e) => setSelectedDeviceId(e.target.value)}
+            onChange={(e) => {
+              setSelectedDeviceId(e.target.value);
+              setIsScanning(false); // restart scan on camera change
+              controlsRef.current?.stop();
+            }}
             className="w-full p-3 rounded text-black"
           >
             {devices.map((device) => (
@@ -95,18 +101,16 @@ export default function BarcodeScannerPage() {
         </div>
       )}
 
-      <div className="relative w-full max-w-sm aspect-[4/3] bg-black rounded overflow-hidden shadow-lg">
+      <div className="w-full max-w-sm aspect-[4/3] bg-gray-800 rounded overflow-hidden shadow-lg relative">
         <video
           ref={videoRef}
           className="absolute w-full h-full object-cover"
-          playsInline
           muted
+          playsInline
         />
       </div>
 
-      {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
-
-      <p className="mt-6 text-sm text-gray-300 text-center">מקם את הברקוד במרכז המסך לסריקה אוטומטית</p>
+      {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
     </div>
   );
 }
