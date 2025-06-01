@@ -44,7 +44,7 @@ export default function DashboardPage() {
           fetch("/api/categories"),
           fetch("/api/stats/top-received-parts"),
           fetch("/api/stats/low-stock"),
-          fetch("/api/stats/total-worth"),
+          fetch("/api/stats/inventory-worth"),
         ]);
 
         const [
