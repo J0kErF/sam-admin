@@ -22,6 +22,7 @@ export default function DashboardPage() {
   });
   const [lowStock, setLowStock] = useState<any[]>([]);
   const [topReceived, setTopReceived] = useState<any[]>([]);
+  const [totalWorth, setTotalWorth] = useState(0);
 
   const router = useRouter();
 
@@ -35,6 +36,7 @@ export default function DashboardPage() {
           categoriesRes,
           topReceivedRes,
           lowStockRes,
+          totalWorthRes,
         ] = await Promise.all([
           fetch("/api/order"),
           fetch("/api/part"),
@@ -42,6 +44,7 @@ export default function DashboardPage() {
           fetch("/api/categories"),
           fetch("/api/stats/top-received-parts"),
           fetch("/api/stats/low-stock"),
+          fetch("/api/stats/total-worth"),
         ]);
 
         const [
@@ -51,6 +54,7 @@ export default function DashboardPage() {
           categories,
           topReceivedData,
           lowStockData,
+          worthData,
         ] = await Promise.all([
           ordersRes.json(),
           partsRes.json(),
@@ -58,6 +62,7 @@ export default function DashboardPage() {
           categoriesRes.json(),
           topReceivedRes.json(),
           lowStockRes.json(),
+          totalWorthRes.json(),
         ]);
 
         setStats({
@@ -69,7 +74,7 @@ export default function DashboardPage() {
 
         setTopReceived(topReceivedData || []);
         setLowStock(lowStockData || []);
-
+        setTotalWorth(worthData.totalWorth || 0);
       } catch (err) {
         console.error("Error loading dashboard stats:", err);
       }
@@ -87,6 +92,14 @@ export default function DashboardPage() {
         <StatCard title="חלקים" icon={<ListOrdered />} value={stats.parts} color="text-green-600" href="/V2/parts" />
         <StatCard title="ספקים" icon={<Truck />} value={stats.providers} color="text-yellow-600" href="/V2/providers" />
         <StatCard title="קטגוריות" icon={<Folder />} value={stats.categories} color="text-purple-600" href="/V2/category" />
+        <StatCard
+          title="שווי מלאי כולל"
+          icon={<span className="text-xl">💰</span>}
+          value={Number(totalWorth).toLocaleString("he-IL", { style: "currency", currency: "ILS" })}
+          color="text-emerald-600"
+          href="/V2/parts"
+        />
+
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {/* חלקים שהוזמנו הכי הרבה */}
@@ -153,7 +166,7 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
-          
+
     </div>
   );
 }
@@ -167,7 +180,7 @@ function StatCard({
 }: {
   title: string;
   icon: React.ReactNode;
-  value: number;
+  value: number | string;
   color: string;
   href: string;
 }) {
