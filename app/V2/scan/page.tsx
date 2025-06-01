@@ -37,11 +37,11 @@ export default function BarcodeScannerPage() {
     if (!selectedDeviceId || !videoRef.current) return;
 
     const codeReader = new BrowserMultiFormatReader(undefined, {
-      delayBetweenScanAttempts: 100, // ✅ Faster scanning
+      delayBetweenScanAttempts: 100, // Fast scan
     });
     codeReaderRef.current = codeReader;
 
-    setIsScanning(false); // reset scanning status
+    setIsScanning(false);
 
     codeReader
       .decodeFromVideoDevice(
@@ -50,9 +50,7 @@ export default function BarcodeScannerPage() {
         (result, error, controls) => {
           if (result && !isScanning) {
             const text = result.getText();
-            console.log("Scanned:", text);
-
-            setIsScanning(true); // prevent double scans
+            setIsScanning(true);
             controls.stop();
             controlsRef.current = controls;
 
@@ -61,8 +59,6 @@ export default function BarcodeScannerPage() {
             } else {
               router.push(`/V2/parts?query=${encodeURIComponent(text)}`);
             }
-          } else if (error) {
-            // silent scan fail
           }
         }
       )
@@ -70,7 +66,6 @@ export default function BarcodeScannerPage() {
         controlsRef.current = controls;
       })
       .catch((err) => {
-        console.error("Scanner init error:", err);
         setError("שגיאה בהפעלת הסורק: " + err.message);
       });
 
@@ -80,16 +75,16 @@ export default function BarcodeScannerPage() {
   }, [selectedDeviceId, router]);
 
   return (
-    <div className="max-w-md mx-auto p-6 text-center">
-      <h1 className="text-xl font-bold mb-4">📷 סרוק ברקוד / QR</h1>
+    <div className="min-h-screen bg-gray-900 text-white p-4 flex flex-col items-center justify-start">
+      <h1 className="text-2xl font-bold mb-4 text-center">📷 סריקת ברקוד / QR</h1>
 
       {devices.length > 1 && (
-        <div className="mb-4">
-          <label className="block mb-2 text-sm font-medium">בחר מצלמה:</label>
+        <div className="mb-4 w-full max-w-sm">
+          <label className="block mb-2 text-lg font-medium">בחר מצלמה:</label>
           <select
             value={selectedDeviceId}
             onChange={(e) => setSelectedDeviceId(e.target.value)}
-            className="border p-2 rounded w-full"
+            className="w-full p-3 rounded text-black"
           >
             {devices.map((device) => (
               <option key={device.deviceId} value={device.deviceId}>
@@ -100,8 +95,18 @@ export default function BarcodeScannerPage() {
         </div>
       )}
 
-      <video ref={videoRef} className="w-full rounded shadow" />
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+      <div className="relative w-full max-w-sm aspect-[4/3] bg-black rounded overflow-hidden shadow-lg">
+        <video
+          ref={videoRef}
+          className="absolute w-full h-full object-cover"
+          playsInline
+          muted
+        />
+      </div>
+
+      {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
+
+      <p className="mt-6 text-sm text-gray-300 text-center">מקם את הברקוד במרכז המסך לסריקה אוטומטית</p>
     </div>
   );
 }
