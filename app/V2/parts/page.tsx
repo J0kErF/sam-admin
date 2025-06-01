@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 export default function PartsListPage() {
+    const searchParams = useSearchParams();
+const initialQuery = searchParams.get("query") || "";
+
     type Provider = {
         providerName: string;
         price: number;
@@ -36,7 +40,7 @@ export default function PartsListPage() {
         year: "",
         providers: [] as string[],
         sortBy: "",
-        query: ""
+        query: initialQuery
     });
 
     const router = useRouter();
