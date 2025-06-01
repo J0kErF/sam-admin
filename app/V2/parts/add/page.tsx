@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import ImageUpload from "@/components/custom ui/ImageUpload";
+import { useRouter } from "next/navigation";
 
 export default function AddPartPage() {
   const [form, setForm] = useState({
@@ -19,6 +20,8 @@ export default function AddPartPage() {
   const [media, setMedia] = useState<string[]>([]);
   const [availableProviders, setAvailableProviders] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+
+  const router = useRouter();
 
   useEffect(() => {
     fetch("/api/providers")
@@ -50,6 +53,7 @@ export default function AddPartPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const yearFrom = parseInt(form.modelYearFrom);
     const yearTo = parseInt(form.modelYearTo);
     const modelYears = Array.from({ length: yearTo - yearFrom + 1 }, (_, i) => yearFrom + i);
@@ -74,7 +78,11 @@ export default function AddPartPage() {
     });
 
     const data = await res.json();
-    if (res.ok) alert("חלק נוסף בהצלחה!");
+    if (res.ok) {
+      alert("חלק נוסף בהצלחה!");
+      router.push(`/V2/parts/${data.part._id}`);
+
+    }
     else alert("שגיאה: " + data.message);
   };
 

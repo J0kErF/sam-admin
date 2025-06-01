@@ -86,7 +86,7 @@ export default function DashboardPage() {
         <StatCard title="הזמנות" icon={<ShoppingBag />} value={stats.orders} color="text-blue-700" href="/V2/orders" />
         <StatCard title="חלקים" icon={<ListOrdered />} value={stats.parts} color="text-green-600" href="/V2/parts" />
         <StatCard title="ספקים" icon={<Truck />} value={stats.providers} color="text-yellow-600" href="/V2/providers" />
-        <StatCard title="קטגוריות" icon={<Folder />} value={stats.categories} color="text-purple-600" href="/V2/categories" />
+        <StatCard title="קטגוריות" icon={<Folder />} value={stats.categories} color="text-purple-600" href="/V2/category" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
         {/* חלקים שהוזמנו הכי הרבה */}
