@@ -43,7 +43,7 @@ export const navLinks = [
     label: "חלקים",
   },
   {
-    url: "/scan",
+    url: "/V2/scan",
     icon: <CameraIcon />,
     label: "סורק",
   },
