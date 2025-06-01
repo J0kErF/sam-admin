@@ -1,71 +1,107 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/browser";
+import { BrowserMultiFormatReader, IScannerControls } from "@zxing/browser";
 import { useRouter } from "next/navigation";
 
 export default function BarcodeScannerPage() {
-    const videoRef = useRef<HTMLVideoElement>(null);
-    const [error, setError] = useState("");
-    const router = useRouter();
-    const controlsRef = useRef<any>(null); // We'll save the returned controls here
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const router = useRouter();
 
-    useEffect(() => {
-        const codeReader = new BrowserMultiFormatReader();
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [error, setError] = useState("");
+  const [isScanning, setIsScanning] = useState(false);
 
-        const startScan = async () => {
-            try {
-                const devices = await BrowserMultiFormatReader.listVideoInputDevices();
-                if (devices.length === 0) {
-                    setError("לא נמצאו מצלמות");
-                    return;
-                }
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const controlsRef = useRef<IScannerControls | null>(null);
 
-                const selectedDeviceId = devices[0].deviceId;
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const availableDevices = await BrowserMultiFormatReader.listVideoInputDevices();
+        setDevices(availableDevices);
+        if (availableDevices.length > 0) {
+          setSelectedDeviceId(availableDevices[0].deviceId);
+        } else {
+          setError("לא נמצאו מצלמות.");
+        }
+      } catch (e: any) {
+        setError("שגיאה בגישה למצלמות: " + e.message);
+      }
+    };
+    init();
+  }, []);
 
-                // ✅ Save the returned controls so we can stop later
-                const controls = await codeReader.decodeFromVideoDevice(
-                    selectedDeviceId,
-                    videoRef.current!,
-                    (result, error) => {
-                        if (result) {
-                            const text = result.getText();
-                            console.log("Scanned:", text);
+  useEffect(() => {
+    if (!selectedDeviceId || !videoRef.current) return;
 
-                            controls.stop(); // ✅ Stop scanning properly
+    const codeReader = new BrowserMultiFormatReader(undefined, {
+      delayBetweenScanAttempts: 100, // ✅ Faster scanning
+    });
+    codeReaderRef.current = codeReader;
 
-                            if (text.startsWith("http")) {
-                                window.location.href = text;
-                            } else {
-                                router.push(`/V2/parts?query=${encodeURIComponent(text)}`);
-                            }
+    setIsScanning(false); // reset scanning status
 
-                        } else if (error) {
-                            console.warn("Scan error:", error);
-                        }
-                    }
-                );
+    codeReader
+      .decodeFromVideoDevice(
+        selectedDeviceId,
+        videoRef.current,
+        (result, error, controls) => {
+          if (result && !isScanning) {
+            const text = result.getText();
+            console.log("Scanned:", text);
 
-                controlsRef.current = controls;
-            } catch (e: any) {
-                setError("שגיאה בהפעלת הסורק: " + e.message);
+            setIsScanning(true); // prevent double scans
+            controls.stop();
+            controlsRef.current = controls;
+
+            if (text.startsWith("http")) {
+              window.location.href = text;
+            } else {
+              router.push(`/V2/parts?query=${encodeURIComponent(text)}`);
             }
-        };
+          } else if (error) {
+            // silent scan fail
+          }
+        }
+      )
+      .then((controls) => {
+        controlsRef.current = controls;
+      })
+      .catch((err) => {
+        console.error("Scanner init error:", err);
+        setError("שגיאה בהפעלת הסורק: " + err.message);
+      });
 
-        startScan();
+    return () => {
+      controlsRef.current?.stop();
+    };
+  }, [selectedDeviceId, router]);
 
-        return () => {
-            if (controlsRef.current) {
-                controlsRef.current.stop(); // ✅ Proper stop on unmount
-            }
-        };
-    }, [router]);
+  return (
+    <div className="max-w-md mx-auto p-6 text-center">
+      <h1 className="text-xl font-bold mb-4">📷 סרוק ברקוד / QR</h1>
 
-    return (
-        <div className="max-w-md mx-auto p-6 text-center">
-            <h1 className="text-xl font-bold mb-4">📷 סריקת ברקוד / QR</h1>
-            <video ref={videoRef} className="w-full rounded shadow" />
-            {error && <p className="text-red-500 mt-2">{error}</p>}
+      {devices.length > 1 && (
+        <div className="mb-4">
+          <label className="block mb-2 text-sm font-medium">בחר מצלמה:</label>
+          <select
+            value={selectedDeviceId}
+            onChange={(e) => setSelectedDeviceId(e.target.value)}
+            className="border p-2 rounded w-full"
+          >
+            {devices.map((device) => (
+              <option key={device.deviceId} value={device.deviceId}>
+                {device.label || `מצלמה ${device.deviceId.slice(-4)}`}
+              </option>
+            ))}
+          </select>
         </div>
-    );
+      )}
+
+      <video ref={videoRef} className="w-full rounded shadow" />
+      {error && <p className="text-red-500 mt-2">{error}</p>}
+    </div>
+  );
 }
