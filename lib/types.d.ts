@@ -1,4 +1,4 @@
-type CollectionType = {
+export type CollectionType = {
   _id: string;
   title: string;
   description: string;
@@ -6,7 +6,7 @@ type CollectionType = {
   products: ProductType[];
 }
 
-type ProductType = {
+export type ProductType = {
   _id: string;
   title: string;
   description: string;
@@ -22,7 +22,7 @@ type ProductType = {
   updatedAt: Date;
 }
 
-type OrderColumnType = {
+export type OrderColumnType = {
   _id: string;
   customer: string;
   products: number;
@@ -30,14 +30,14 @@ type OrderColumnType = {
   createdAt: string;
 }
 
-type OrderItemType = {
+export type OrderItemType = {
   product: ProductType
   location: string;
   size: string;
   quantity: number;
 }
 
-type CustomerType = {
+export type CustomerType = {
   clerkId: string;
   name: string;
   email: string;
