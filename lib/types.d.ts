@@ -42,3 +42,20 @@ type CustomerType = {
   name: string;
   email: string;
 }
+
+export type ReturnedPart = {
+  partId: string;           // נקבל אותו כמחרוזת מהשרת
+  providerBarcode: string;
+  quantity: number;
+  price: number;
+  reason?: string;
+};
+
+export type ReturnForm = {
+  providerName: string;
+  contactName?: string;
+  status: string;
+  date?: Date;                 // אופציונלי כי נוצר אוטומטית בצד השרת
+  photos: string[];
+  parts: ReturnedPart[];
+};

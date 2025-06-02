@@ -3,6 +3,7 @@ import {
   CarIcon,
   ClipboardSignature,
   CreditCard,
+  FileX,
   Folder,
   Home,
   LayoutDashboard,
@@ -58,9 +59,9 @@ export const navLinks = [
     label: "הזמנות",
   },
   {
-    url: "/V2/stock-check",
-    icon: <ClipboardSignature />,
-    label: "ספירת מלאי",
+    url: "/V2/returns",
+    icon: <FileX/>,
+    label:  "החזרות",
   },
   /*{
     url: "/reports",

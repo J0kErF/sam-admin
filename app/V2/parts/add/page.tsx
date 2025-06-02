@@ -14,6 +14,8 @@ export default function AddPartPage() {
     subMake: "",
     sellPrice: "",
     category: "",
+    companyBarcode: "", // ✅ Add this
+
   });
 
   const [providers, setProviders] = useState([{ providerName: "", price: "", barcode: "", quantity: "", location: "" }]);
@@ -113,6 +115,16 @@ export default function AddPartPage() {
             <div className="space-y-3">
               <input name="name" placeholder="שם החלק" onChange={handleChange} className="border p-3 rounded w-full" required />
               <input name="sellPrice" placeholder="מחיר מכירה" type="number" onChange={handleChange} className="border p-3 rounded w-full" required />
+              <input
+                name="companyBarcode"
+                placeholder="ברקוד החברה"
+                value={form.companyBarcode}
+                onChange={handleChange}
+                className="border p-3 rounded w-full"
+                required
+              />
+
+
               <div className="flex gap-3">
                 <input
                   type="number"
