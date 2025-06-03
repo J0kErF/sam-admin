@@ -1,10 +1,8 @@
-// app/V2/orders/page.tsx
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";  
 
 export type OrderProduct = {
     productId: string;
@@ -92,6 +90,55 @@ export default function OrdersPage() {
         setEditedOrder(JSON.parse(JSON.stringify(order)));
     };
 
+    const fetchProviderPhone = async (providerName: string) => {
+        try {
+            const res = await fetch(`/api/providers/by-name?name=${encodeURIComponent(providerName)}`);
+            const data = await res.json();
+            return data?.provider?.phoneNumber || "";
+        } catch {
+            return "";
+        }
+    };
+    function formatPhoneToInternational(phone: string): string {
+        // מסיר רווחים, מקפים, וסוגריים
+        const cleaned = phone.replace(/[^\d]/g, '');
+
+        if (cleaned.startsWith("0")) {
+            return `+972${cleaned.slice(1)}`;
+        }
+
+        if (cleaned.startsWith("972")) {
+            return `+${cleaned}`;
+        }
+
+        // במידה והמספר כבר בפורמט תקני
+        return phone;
+    }
+
+    const generateWhatsAppLink = async (providerName: string, items: OrderProduct[]) => {
+        const Pphone = await fetchProviderPhone(providerName).catch(() => "");
+        if (!Pphone) {
+            // error
+            alert("לא ניתן למצוא את מספר הטלפון של הספק");
+            return "";
+        }
+        const phone = formatPhoneToInternational(Pphone);
+        if (!items || items.length === 0) {
+            alert("אין פריטים להזמין");
+            return "";
+        }
+        if (items.some(item => !item.name || !item.barcode || item.quantity <= 0)) {
+            alert("יש לוודא שכל הפריטים מכילים שם, ברקוד וכמות תקינה");
+            return "";
+        }
+
+        const message = `שלום, רוצה להזמין את החלקים:\n\n` +
+            items.map((item, index) =>
+                `* ${item.name}\nברקוד: ${item.barcode}\nכמות: ${item.quantity}`
+            ).join("\n\n");
+        return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold mb-6">📦 הזמנות</h1>
@@ -107,49 +154,35 @@ export default function OrdersPage() {
                     return (
                         <div key={order._id} className="bg-white p-5 rounded-xl shadow">
                             <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-xl font-semibold text-gray-800">
-                                    הזמנה #{order._id.slice(-6)}
-                                </h2>
+                                <h2 className="text-xl font-semibold text-gray-800">הזמנה #{order._id.slice(-6)}</h2>
                                 <div className="flex items-center gap-4">
-                                    <span className="text-sm text-gray-600">
-                                        {format(new Date(order.createdAt), "PPpp")}
-                                    </span>
-                                    <button
-                                        className="text-blue-600 hover:underline text-sm"
-                                        onClick={() => handleEditClick(order)}
-                                    >
-                                        ערוך
-                                    </button>
-                                    <button
-                                        className="text-red-600 hover:underline text-sm"
-                                        onClick={() => deleteOrder(order._id)}
-                                    >
-                                        מחק
-                                    </button>
+                                    <span className="text-sm text-gray-600">{format(new Date(order.createdAt), "PPpp")}</span>
+                                    <button className="text-blue-600 hover:underline text-sm" onClick={() => handleEditClick(order)}>ערוך</button>
+                                    <button className="text-red-600 hover:underline text-sm" onClick={() => deleteOrder(order._id)}>מחק</button>
                                 </div>
                             </div>
-                            <p className="text-sm text-gray-700 mb-2">
-                                <strong>סטטוס:</strong> {order.status}
-                            </p>
-                            <p className="text-sm text-gray-600 mb-4">
-                                <strong>הערות:</strong> {order.notes || "לא נמסרו הערות"}
-                            </p>
+                            <p className="text-sm text-gray-700 mb-2"><strong>סטטוס:</strong> {order.status}</p>
+                            <p className="text-sm text-gray-600 mb-4"><strong>הערות:</strong> {order.notes || "לא נמסרו הערות"}</p>
 
                             {Object.entries(groupedByProvider).map(([provider, items], i) => (
                                 <div key={i} className="border rounded-lg p-4 mb-4">
-                                    <h4 className="text-sm font-medium text-gray-800 mb-2">
-                                        ספק: <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push(`/V2/providers`)}>{provider}</span>
-                                    </h4>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="text-sm font-medium text-gray-800">ספק: <span className="text-blue-600 cursor-pointer hover:underline" onClick={() => router.push(`/V2/providers`)}>{provider}</span></h4>
+                                        <button
+                                            onClick={async () => {
+                                                const link = await generateWhatsAppLink(provider, items);
+                                                window.open(link, "_blank");
+                                            }}
+                                            className="bg-green-600 text-white text-xs px-3 py-1 rounded hover:bg-green-700"
+                                        >
+                                            שלח בואטסאפ
+                                        </button>
+                                    </div>
                                     <div className="divide-y">
                                         {items.map((item, idx) => (
                                             <div key={idx} className="py-2 flex justify-between text-sm">
                                                 <div>
-                                                    <p
-                                                        className="text-blue-600 cursor-pointer hover:underline font-medium"
-                                                        onClick={() => router.push(`/V2/parts/${item.productId}`)}
-                                                    >
-                                                        {item.name}
-                                                    </p>
+                                                    <p className="text-blue-600 cursor-pointer hover:underline font-medium" onClick={() => router.push(`/V2/parts/${item.productId}`)}>{item.name}</p>
                                                     <p className="text-xs text-gray-500">ברקוד: {item.barcode}</p>
                                                 </div>
                                                 <div className="text-right">
@@ -165,100 +198,6 @@ export default function OrdersPage() {
                     );
                 })}
             </div>
-
-            {/* Edit Modal remains unchanged */}
-            {selectedOrder && editedOrder && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-                    <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <h3 className="text-xl font-bold mb-4">עריכת הזמנה #{selectedOrder._id.slice(-6)}</h3>
-
-                        <label className="block mb-2 text-sm font-medium">סטטוס</label>
-                        <select
-                            className="w-full p-2 border rounded mb-4"
-                            value={editedOrder.status}
-                            onChange={(e) => setEditedOrder({ ...editedOrder, status: e.target.value })}
-                        >
-                            {STATUS_OPTIONS.map((s) => (
-                                <option key={s} value={s}>{s}</option>
-                            ))}
-                        </select>
-
-                        <label className="block mb-2 text-sm font-medium">הערות</label>
-                        <textarea
-                            className="w-full p-2 border rounded mb-4"
-                            value={editedOrder.notes || ""}
-                            onChange={(e) => setEditedOrder({ ...editedOrder, notes: e.target.value })}
-                        />
-
-                        {editedOrder.products.map((p, idx) => (
-                            <div key={idx} className="mb-4 border p-3 rounded">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <p className="font-semibold text-blue-600 cursor-pointer" onClick={() => router.push(`/V2/parts/${p.productId}`)}>{p.name}</p>
-                                        <p className="text-xs text-gray-500">ברקוד: {p.barcode}</p>
-                                        <p className="text-xs text-gray-700">ספק: {p.selectedProvider.name}</p>
-                                    </div>
-                                    <div className="text-right space-y-1">
-                                        <label className="block text-xs">כמות</label>
-                                        <input
-                                            type="number"
-                                            className="border p-1 rounded w-20 text-right"
-                                            value={p.quantity}
-                                            onChange={(e) => {
-                                                const quantity = parseInt(e.target.value);
-                                                const updatedProducts = [...editedOrder.products];
-                                                updatedProducts[idx].quantity = quantity;
-                                                setEditedOrder({ ...editedOrder, products: updatedProducts });
-                                            }}
-                                        />
-                                        <label className="block text-xs">מחיר</label>
-                                        <input
-                                            type="number"
-                                            className="border p-1 rounded w-20 text-right"
-                                            value={p.selectedProvider.price}
-                                            onChange={(e) => {
-                                                const price = parseFloat(e.target.value);
-                                                const updatedProducts = [...editedOrder.products];
-                                                updatedProducts[idx].selectedProvider.price = price;
-                                                setEditedOrder({ ...editedOrder, products: updatedProducts });
-                                            }}
-                                        />
-                                        <button
-                                            onClick={() => {
-                                                const updatedProducts = editedOrder.products.filter(
-                                                    (x) => !(x.productId === p.productId && x.selectedProvider.name === p.selectedProvider.name)
-                                                );
-                                                setEditedOrder({ ...editedOrder, products: updatedProducts });
-                                            }}
-                                            className="text-red-600 hover:underline text-xs mt-2"
-                                        >
-                                            הסר
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-
-                        <div className="flex justify-end gap-4 mt-6">
-                            <button
-                                className="bg-gray-300 px-4 py-2 rounded"
-                                onClick={() => {
-                                    setSelectedOrder(null);
-                                    setEditedOrder(null);
-                                }}
-                            >
-                                ביטול
-                            </button>
-                            <button
-                                className="bg-green-600 text-white px-4 py-2 rounded"
-                                onClick={() => updateOrder(editedOrder._id, editedOrder)}
-                            >
-                                שמור שינויים
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
