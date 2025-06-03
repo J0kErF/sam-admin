@@ -112,7 +112,26 @@ export default function ReturnsListPage() {
     };
 
     if (loading) return <div className="p-6 text-center animate-pulse">🔄 טוען קריאות...</div>;
-    if (!returns.length) return <div className="p-6 text-center text-gray-500">אין קריאות חזרה להצגה</div>;
+    if (!returns.length) {
+        return (
+            <div className="p-6 max-w-5xl mx-auto space-y-6" dir="rtl">
+                <h1 className="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-2">
+                    <PackageOpen className="w-8 h-8" /> קריאות החזרה
+                </h1>
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => router.push("/V2/returns/add")}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+                    >
+                        <Plus className="w-4 h-4" />
+                        הוסף קריאה חדשה
+                    </button>
+                </div>
+                <div className="text-center text-gray-500">אין קריאות חזרה להצגה</div>
+            </div>
+        );
+    }
+    
 
     return (
         <div dir="rtl" className="p-6 max-w-5xl mx-auto space-y-6">
@@ -230,8 +249,8 @@ export default function ReturnsListPage() {
 
                         <div className="flex justify-end gap-3">
                             <button
-                                onClick={() => router.push(`/returns/edit/${r._id}`)}
-                                className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition hidden"
+                                onClick={() => router.push(`/V2/returns/edit/${r._id}`)}
+                                className="flex items-center gap-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition "
                             >
                                 <Pencil className="w-4 h-4" />
                                 ערוך

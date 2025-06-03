@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongoDB";
 import { ReturnRequest } from "@/lib/models/ReturnRequest";
 
+export const dynamic = "force-dynamic"; // Ensures the route is always fresh
 export async function GET(req: NextRequest) {
   try {
     await connectToDB();

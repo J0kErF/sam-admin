@@ -27,3 +27,5 @@ export const GET = async () => {
     );
   }
 };
+
+export const dynamic = "force-dynamic"; // Ensures the route is always fresh
