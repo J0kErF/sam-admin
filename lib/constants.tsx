@@ -63,9 +63,9 @@ export const navLinks = [
     icon: <FileX/>,
     label:  "החזרות",
   },
-  /*{
-    url: "/reports",
+  {
+    url: "/V2/notes",
     icon: <NotebookIcon />,
-    label: "דוחות",
-  },*/
+    label: "הערות",
+  },
 ];

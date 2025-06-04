@@ -116,7 +116,7 @@ export default function NotesPage() {
                 />
                 <select
                     value={form.type}
-                    onChange={(e) => setEditForm({ ...editForm, type: e.target.value as NoteType })}
+                    onChange={(e) => setForm({ ...form, type: e.target.value as NoteType })}
                     className="border p-2 rounded w-full"
                 >
                     <option value="רגיל">פתק רגיל</option>
