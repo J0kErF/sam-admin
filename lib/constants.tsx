@@ -66,7 +66,7 @@ export const navLinks = [
   },
   
   {
-    url: "/on-site",
+    url: "/V2/on-site",
     icon: <Truck />,
     label: "צמ\"ה",
   },
