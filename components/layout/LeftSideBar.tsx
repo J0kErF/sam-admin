@@ -75,21 +75,22 @@ const LeftSideBar = () => {
       {/* Logo & Navigation */}
       <div className="flex flex-col gap-6 p-6">
         {/* Logo */}
-        <Link href="/" className="flex justify-center items-center mb-4 relative">
-          <Image src="/icons/icon-512.png" alt="logo" width={48} height={48} />
-          {/* Status Indicator */}
+        <div className="flex justify-center items-center mb-4 relative">
+          <Link href="/" className="relative">
+            <Image src="/icons/icon-512.png" alt="logo" width={48} height={48} />
+
+          </Link>
           {indicatorColor && (
             <span
-              className={`absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full border border-white ${indicatorColor}`}
+              className={`absolute -top-1 -right-0 w-4 h-4 rounded-full border border-white ${indicatorColor}`}
               title={indicatorTooltip}
             />
           )}
-          {/* Reload Icon */}
           <RefreshCcw
-            className="absolute -bottom-1 -right-1 w-4 h-4 text-gray-500 hover:text-blue-600 cursor-pointer"
+            className="absolute -bottom-1 right-0 w-4 h-4 text-gray-500 hover:text-blue-600 cursor-pointer"
             onClick={() => window.location.reload()}
           />
-        </Link>
+        </div>
 
 
 

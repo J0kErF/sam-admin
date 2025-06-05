@@ -80,20 +80,24 @@ const TopBar = () => {
 
   return (
     <header className="sticky top-0 z-30 w-full flex justify-between items-center px-4 py-3 bg-white shadow-md border-b border-gray-200 lg:hidden">
-      {/* Logo & Indicator */}
-      <Link href="/" className="relative flex items-center gap-2">
-        <Image src="/icons/icon-192.png" alt="logo" width={50} height={50} />
-        {indicatorColor && (
-          <span
-            className={`w-3.5 h-3.5 rounded-full border border-white ${indicatorColor}`}
-            title={indicatorTooltip}
-          />
-        )}
+      {/* Logo + Indicator + Refresh */}
+      <div className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/icons/icon-192.png" alt="logo" width={50} height={50} />
+          {indicatorColor && (
+            <span
+              className={`w-3.5 h-3.5 rounded-full border border-white ${indicatorColor}`}
+              title={indicatorTooltip}
+            />
+          )}
+        </Link>
         <RefreshCcw
           className="w-4 h-4 text-gray-600 hover:text-blue-600 transition cursor-pointer"
           onClick={() => window.location.reload()}
         />
-      </Link>
+      </div>
+
+
 
       {/* Install + Menu + User */}
       <div className="relative flex items-center gap-4">

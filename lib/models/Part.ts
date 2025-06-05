@@ -40,7 +40,7 @@ const PartSchema = new Schema<IPart>({
   category: { type: String, required: true },
   media: { type: [String], default: [] },
   providers: { type: [ProviderSchema], default: [] },
-  companyBarcode: { type: String, default: "" }, // ✅ new field
+  companyBarcode: { type: String, default: "" },
 });
 
 export const Part =
