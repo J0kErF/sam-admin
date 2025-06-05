@@ -3,6 +3,7 @@ import {
   CarIcon,
   ClipboardSignature,
   CreditCard,
+  Factory,
   FileX,
   Folder,
   Home,
@@ -24,18 +25,13 @@ export const navLinks = [
     label: "עמוד ראשי",
   },
   {
-    url: "/car-search",
-    icon: <CarIcon />,
-    label: "איתור רכב",
-  },
-  {
     url: "/V2/category",
     icon: <Folder />,
     label: "קטגוריות",
   },
   {
     url: "/V2/providers",
-    icon: <Truck />,
+    icon: <Factory />,
     label: "ספקים",
   },
   {
@@ -67,5 +63,11 @@ export const navLinks = [
     url: "/V2/notes",
     icon: <NotebookIcon />,
     label: "הערות",
+  },
+  
+  {
+    url: "/on-site",
+    icon: <Truck />,
+    label: "צמ\"ה",
   },
 ];
