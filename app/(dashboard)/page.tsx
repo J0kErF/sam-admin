@@ -23,12 +23,14 @@ export default function DashboardPage() {
   const [lowStock, setLowStock] = useState<any[]>([]);
   const [topReceived, setTopReceived] = useState<any[]>([]);
   const [totalWorth, setTotalWorth] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const router = useRouter();
 
   useEffect(() => {
     async function fetchStats() {
       try {
+
         const [
           ordersRes,
           partsRes,
@@ -75,6 +77,8 @@ export default function DashboardPage() {
         setTopReceived(topReceivedData || []);
         setLowStock(lowStockData || []);
         setTotalWorth(worthData.totalWorth || 0);
+        setLoading(false);
+
       } catch (err) {
         console.error("Error loading dashboard stats:", err);
       }
@@ -82,6 +86,13 @@ export default function DashboardPage() {
 
     fetchStats();
   }, []);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[70vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600 border-opacity-50" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
