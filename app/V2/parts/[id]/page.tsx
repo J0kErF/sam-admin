@@ -35,6 +35,7 @@ export default function Page() {
         category: string;
         media: string[];
         companyBarcode: string;
+        isOnsite: boolean;
         providers: {
             providerName: string;
             price: number | string;
@@ -52,6 +53,7 @@ export default function Page() {
         category: "",
         media: [],
         companyBarcode: "",
+        isOnsite: false,
         providers: []
     });
 
@@ -74,6 +76,7 @@ export default function Page() {
                     modelYearFrom: Math.min(...data.modelYears),
                     modelYearTo: Math.max(...data.modelYears),
                     companyBarcode: data.companyBarcode || "", // ✅ ensure safe fallback
+                    isOnsite: data.isOnsite ?? false,
                 });
                 setLoading(false);
             });
@@ -150,6 +153,7 @@ export default function Page() {
         // 3. Prepare new data
         const newData = {
             ...form,
+            isOnsite: form.isOnsite,
             companyBarcode: form.companyBarcode,
             updateReason: reason,
             modelYears,
@@ -165,7 +169,7 @@ export default function Page() {
         // 4. Compare general fields
         const updates: any[] = [];
         const fieldsToCheck = [
-            "name", "sellPrice", "subMake", "category", "companyBarcode", "modelYears", "carCompanies"
+            "name", "sellPrice", "subMake", "category", "companyBarcode", "modelYears", "carCompanies", "isOnsite"
         ] as const;
         const fieldTranslations: Record<string, string> = {
             name: "שם החלק",
@@ -180,6 +184,7 @@ export default function Page() {
             barcode: "ברקוד ספק",
             location: "מיקום ספק",
             כללי: "כללי",
+            isOnsite: "לצמ\"ה",
         };
         type FieldToCheck = typeof fieldsToCheck[number];
 
@@ -540,8 +545,21 @@ export default function Page() {
                             ))}
                         </select>
                     </div>
-                </div>
 
+                    <div className="flex items-center gap-2">
+                        <label htmlFor="onsiteToggle" className="text-sm font-medium text-gray-700">
+                            לצמ"ה
+                        </label>
+                        <input
+                            id="onsiteToggle"
+                            type="checkbox"
+                            checked={form.isOnsite}
+                            onChange={() => setForm(prev => ({ ...prev, isOnsite: !prev.isOnsite }))}
+                            className="w-5 h-5 accent-blue-600"
+                        />
+                    </div>
+
+                </div>
                 {/* Right column: Images */}
                 <div className="bg-white shadow rounded-xl p-4 sm:p-6">
                     <h3 className="font-semibold mb-3 text-gray-700">תמונות</h3>

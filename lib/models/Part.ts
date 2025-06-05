@@ -17,7 +17,8 @@ export interface IPart extends Document {
   category: string;
   media: string[];
   providers: ProviderEntry[];
-  companyBarcode?: string; // ✅ new field
+  companyBarcode?: string;
+  isOnsite?: boolean; // ✅ NEW FIELD (optional in TypeScript)
 }
 
 const ProviderSchema = new Schema<ProviderEntry>(
@@ -41,6 +42,7 @@ const PartSchema = new Schema<IPart>({
   media: { type: [String], default: [] },
   providers: { type: [ProviderSchema], default: [] },
   companyBarcode: { type: String, default: "" },
+  isOnsite: { type: Boolean, default: false }, // ✅ NEW FIELD (optional + default)
 });
 
 export const Part =

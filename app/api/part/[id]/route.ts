@@ -2,33 +2,44 @@ import { connectToDB } from "@/lib/mongoDB";
 import { Part } from "@/lib/models/Part";
 import { NextRequest, NextResponse } from "next/server";
 
-import { PartLog } from "@/lib/models/PartLog";
-
 export const dynamic = "force-dynamic";
 
-// ✅ GET single part by ID
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+// ✅ GET part by ID
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = params.id;
     await connectToDB();
-
-    const part = await Part.findById(id);
+    const part = await Part.findById(params.id);
     if (!part) {
       return NextResponse.json({ message: "Part not found" }, { status: 404 });
     }
-
     return NextResponse.json(part);
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
-
+// ✅ PUT update part
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  await connectToDB();
-  const data = await req.json();
-  const updated = await Part.findByIdAndUpdate(params.id, data, { new: true });
-  return NextResponse.json(updated);
+  try {
+    await connectToDB();
+    const body = await req.json();
+
+    // Ensure isOnSite is present, default to false if missing
+    const updateData = {
+      ...body,
+      isOnsite: typeof body.isOnsite === "boolean" ? body.isOnsite : false,
+    };
+
+    const updatedPart = await Part.findByIdAndUpdate(params.id, updateData, { new: true });
+
+    if (!updatedPart) {
+      return NextResponse.json({ message: "Part not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedPart);
+  } catch (error: any) {
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
 }
 
 // ✅ DELETE part by ID
@@ -39,7 +50,7 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
     if (!deleted) {
       return NextResponse.json({ message: "Part not found" }, { status: 404 });
     }
-    return NextResponse.json({ message: "Part deleted" });
+    return NextResponse.json({ message: "Part deleted successfully" });
   } catch (error: any) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }

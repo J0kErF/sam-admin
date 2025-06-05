@@ -14,7 +14,8 @@ export default function AddPartPage() {
     subMake: "",
     sellPrice: "",
     category: "",
-    companyBarcode: "", // ✅ Add this
+    companyBarcode: "",
+    isOnsite: false,
 
   });
 
@@ -65,6 +66,7 @@ export default function AddPartPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...form,
+        isOnsite: form.isOnsite ?? false,
         sellPrice: parseFloat(form.sellPrice),
         modelYears,
         carCompanies: form.carCompanies.split(",").map((c) => c.trim()),
@@ -149,6 +151,19 @@ export default function AddPartPage() {
                   <option key={idx} value={cat}>{cat}</option>
                 ))}
               </select>
+              <div className="flex items-center gap-3">
+                <label htmlFor="onsiteToggle" className="text-sm font-medium text-gray-700">
+                  לצמ"ה
+                </label>
+                <input
+                  id="onsiteToggle"
+                  type="checkbox"
+                  checked={form.isOnsite}
+                  onChange={() => setForm(prev => ({ ...prev, isOnsite: !prev.isOnsite }))}
+                  className="w-5 h-5 accent-blue-600"
+                />
+              </div>
+
             </div>
           </div>
 

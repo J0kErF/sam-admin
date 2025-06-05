@@ -27,6 +27,7 @@ export default function PartsListPage() {
     media: string[];
     providers: Provider[];
     companyBarcode?: string;
+    isOnsite?: boolean; // Optional field for TypeScript
   };
 
   const [parts, setParts] = useState<Part[]>([]);
@@ -39,8 +40,13 @@ export default function PartsListPage() {
     year: "",
     providers: [] as string[],
     sortBy: "",
-    query: initialQuery
+    query: initialQuery,
+    onsite: {
+      לצמה: true,
+      לרכבים: true,
+    },
   });
+
 
   const router = useRouter();
 
@@ -67,9 +73,13 @@ export default function PartsListPage() {
         part.carCompanies.some((c) => c.toLowerCase().includes(filters.query.toLowerCase())) ||
         part.providers.some((p) => p.barcode.toLowerCase().includes(filters.query.toLowerCase())) ||
         (part.companyBarcode?.toLowerCase().includes(filters.query.toLowerCase()));
-
+      const matchesOnsite =
+        (filters.onsite.לצמה && part.isOnsite) ||
+        (filters.onsite.לרכבים && !part.isOnsite);
       return (
         matchesQuery &&
+          matchesOnsite && // ✅ add this line
+
         (filters.categories.length === 0 || filters.categories.includes(part.category)) &&
         (!filters.model || part.carCompanies.includes(filters.model)) &&
         (!filters.subMake || part.subMake.toLowerCase().includes(filters.subMake.toLowerCase())) &&
@@ -168,6 +178,39 @@ export default function PartsListPage() {
             ))}
           </div>
         </div>
+        <div className="col-span-full">
+          <label className="block font-medium text-sm mb-1">סוג שימוש</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.onsite.לצמה}
+                onChange={() =>
+                  setFilters(prev => ({
+                    ...prev,
+                    onsite: { ...prev.onsite, לצמה: !prev.onsite.לצמה }
+                  }))
+                }
+                className="accent-green-600 w-4 h-4"
+              />
+              <span className="text-sm text-gray-700">לצמ"ה</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={filters.onsite.לרכבים}
+                onChange={() =>
+                  setFilters(prev => ({
+                    ...prev,
+                    onsite: { ...prev.onsite, לרכבים: !prev.onsite.לרכבים }
+                  }))
+                }
+                className="accent-blue-600 w-4 h-4"
+              />
+              <span className="text-sm text-gray-700">לרכבים</span>
+            </label>
+          </div>
+        </div>
 
         <select
           value={filters.sortBy}
@@ -214,6 +257,12 @@ export default function PartsListPage() {
               <p className="text-sm text-gray-700 mb-1"><strong>כמות:</strong> {quantity}</p>
               <p className="text-sm text-gray-700 mb-1"><strong>ספקים:</strong> {providerNames}</p>
               <p className="text-xs text-gray-500 mt-1"><strong>ברקוד יצרן:</strong> {part.companyBarcode || "-"}</p>
+              {part.isOnsite && (
+                <span className="mt-2 inline-block text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full font-medium">
+                  לצמ"ה
+                </span>
+              )}
+
             </div>
           );
         })}
