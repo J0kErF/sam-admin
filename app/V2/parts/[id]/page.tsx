@@ -184,7 +184,7 @@ export default function Page() {
             barcode: "ברקוד ספק",
             location: "מיקום ספק",
             כללי: "כללי",
-            isOnsite: "לצמ\"ה",
+            isOnsite: "לצמה",
         };
         type FieldToCheck = typeof fieldsToCheck[number];
 
@@ -548,7 +548,7 @@ export default function Page() {
 
                     <div className="flex items-center gap-2">
                         <label htmlFor="onsiteToggle" className="text-sm font-medium text-gray-700">
-                            לצמ"ה
+                            לצמה
                         </label>
                         <input
                             id="onsiteToggle"

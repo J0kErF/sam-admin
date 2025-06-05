@@ -193,7 +193,7 @@ export default function PartsListPage() {
                 }
                 className="accent-green-600 w-4 h-4"
               />
-              <span className="text-sm text-gray-700">לצמ"ה</span>
+              <span className="text-sm text-gray-700">לצמה</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -259,7 +259,7 @@ export default function PartsListPage() {
               <p className="text-xs text-gray-500 mt-1"><strong>ברקוד יצרן:</strong> {part.companyBarcode || "-"}</p>
               {part.isOnsite && (
                 <span className="mt-2 inline-block text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full font-medium">
-                  לצמ"ה
+                  לצמה
                 </span>
               )}
 

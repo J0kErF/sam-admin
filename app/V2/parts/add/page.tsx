@@ -153,7 +153,7 @@ export default function AddPartPage() {
               </select>
               <div className="flex items-center gap-3">
                 <label htmlFor="onsiteToggle" className="text-sm font-medium text-gray-700">
-                  לצמ"ה
+                  לצמה
                 </label>
                 <input
                   id="onsiteToggle"
