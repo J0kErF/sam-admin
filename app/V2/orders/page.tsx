@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";  
+import { useRouter } from "next/navigation";
 
 export type OrderProduct = {
     productId: string;
@@ -195,9 +195,150 @@ export default function OrdersPage() {
                                 </div>
                             ))}
                         </div>
+
                     );
+
                 })}
             </div>
+            {editedOrder && (
+                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-30 flex justify-center items-center z-50 overflow-auto">
+                    <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                        <h2 className="text-lg font-bold mb-4">✏️ עריכת הזמנה מלאה</h2>
+
+                        {/* 🟡 Edit Status */}
+                        <div className="mb-4">
+                            <label className="block text-sm text-gray-700 mb-1">סטטוס</label>
+                            <select
+                                className="border p-2 w-full rounded"
+                                value={editedOrder.status}
+                                onChange={(e) => setEditedOrder({ ...editedOrder, status: e.target.value })}
+                            >
+                                {STATUS_OPTIONS.map((status) => (
+                                    <option key={status} value={status}>{status}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* 🟡 Edit Notes */}
+                        <div className="mb-4">
+                            <label className="block text-sm text-gray-700 mb-1">הערות</label>
+                            <textarea
+                                className="border p-2 w-full rounded"
+                                value={editedOrder.notes || ""}
+                                onChange={(e) => setEditedOrder({ ...editedOrder, notes: e.target.value })}
+                            />
+                        </div>
+
+                        {/* 🟢 Edit Each Product */}
+                        <h3 className="text-sm font-semibold mb-2">פריטים:</h3>
+                        <div className="space-y-4">
+                            {editedOrder.products.map((product, idx) => (
+                                <div
+                                    key={idx}
+                                    className="relative border rounded-lg p-4 bg-gray-50 shadow-sm hover:shadow-md transition"
+                                >
+                                    {/* ❌ Remove Button - top right */}
+                                    <button
+                                        onClick={() => {
+                                            const updated = editedOrder.products.filter((_, i) => i !== idx);
+                                            setEditedOrder({ ...editedOrder, products: updated });
+                                        }}
+                                        className="absolute top-2 right-2 text-red-600 hover:text-red-800 bg-white rounded-full p-1 shadow"
+                                        title="הסר פריט"
+                                    >
+                                        ❌
+                                    </button>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs mb-1">שם חלק</label>
+                                            <input
+                                                type="text"
+                                                className="border rounded w-full p-2 text-sm"
+                                                value={product.name}
+                                                onChange={(e) => {
+                                                    const updated = [...editedOrder.products];
+                                                    updated[idx].name = e.target.value;
+                                                    setEditedOrder({ ...editedOrder, products: updated });
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs mb-1">ברקוד</label>
+                                            <input
+                                                type="text"
+                                                className="border rounded w-full p-2 text-sm"
+                                                value={product.barcode}
+                                                onChange={(e) => {
+                                                    const updated = [...editedOrder.products];
+                                                    updated[idx].barcode = e.target.value;
+                                                    setEditedOrder({ ...editedOrder, products: updated });
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs mb-1">כמות</label>
+                                            <input
+                                                type="number"
+                                                className="border rounded w-full p-2 text-sm"
+                                                value={product.quantity}
+                                                onChange={(e) => {
+                                                    const updated = [...editedOrder.products];
+                                                    updated[idx].quantity = parseInt(e.target.value);
+                                                    setEditedOrder({ ...editedOrder, products: updated });
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs mb-1">מחיר</label>
+                                            <input
+                                                type="number"
+                                                className="border rounded w-full p-2 text-sm"
+                                                value={product.selectedProvider.price}
+                                                onChange={(e) => {
+                                                    const updated = [...editedOrder.products];
+                                                    updated[idx].selectedProvider.price = parseFloat(e.target.value);
+                                                    setEditedOrder({ ...editedOrder, products: updated });
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+
+                        </div>
+
+                        {/* 🔵 Save / Cancel */}
+                        <div className="flex justify-between mt-6">
+                            <button
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded"
+                                onClick={() => {
+                                    setEditedOrder(null);
+                                    setSelectedOrder(null);
+                                }}
+                            >
+                                ביטול
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-blue-600 text-white rounded"
+                                onClick={() =>
+                                    updateOrder(editedOrder._id, {
+                                        status: editedOrder.status,
+                                        notes: editedOrder.notes,
+                                        products: editedOrder.products,
+                                    })
+                                }
+                            >
+                                שמור שינויים
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
