@@ -8,6 +8,13 @@ body,
   height: 75%;
   font-family: 'Alef', sans-serif;
 }
+input,
+textarea,
+select {
+  direction: rtl;
+  text-align: right;
+}
+
 
 /* globals.css or inside a module if using CSS modules */
 
